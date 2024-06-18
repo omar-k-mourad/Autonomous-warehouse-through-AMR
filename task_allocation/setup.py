@@ -21,7 +21,7 @@ setup(
     entry_points={
         'console_scripts': [
             'listener = task_allocation.get_loc:main',
-            'talker = task_allocation.pup:main',
+            'talker = task_allocation.main:main',
         ],
     },
 )

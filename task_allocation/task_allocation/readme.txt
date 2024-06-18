@@ -13,7 +13,7 @@
         python3 config.py
     installing boto3 to connect to aws:
         create a requirments.txt file and add boto3
-        pip3 install -r requirments.txt -t ./.venv/lib/python(write ur version)/site-packages/
+        pip3 install -r requirements.txt -t ./.venv/lib/python(write ur version)/site-packages/
 
 #### set_cover_greedy ####
 
