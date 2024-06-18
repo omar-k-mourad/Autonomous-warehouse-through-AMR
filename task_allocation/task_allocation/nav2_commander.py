@@ -29,7 +29,8 @@ def set_initial_pose():
 def main():
     # --- Init ROS2 communications and Simple Commander API ---
     rclpy.init()
-    nav = BasicNavigator()
+    nav1 = BasicNavigator(namespace='robot1')
+    nav2 = BasicNavigator(namespace='robot2')
 
     # --- Set initial pose ---
     # !!! Comment if the initial pose is already set !!!
@@ -37,21 +38,25 @@ def main():
     #nav.setInitialPose(initial_pose)
 
     # --- Wait for Nav2 ---
-    nav.waitUntilNav2Active()
+    nav1.waitUntilNav2Active()
+    nav2.waitUntilNav2Active()
 
     
-    start = create_pose_stamped(nav, 0.0, 0.0, 0.0)
-    goal = create_pose_stamped(nav, 3.4, 0.4, 0.0)
+    start = create_pose_stamped(nav1, 0.0, 0.0, 0.0)
+    goal = create_pose_stamped(nav1, 3.4, 0.4, 0.0)
 
-    ans = nav.getPath(start=start, goal=goal, planner_id='GridBased',use_start=True)
-    print(len(ans.poses))
+    #ans = nav.getPath(start=start, goal=goal, planner_id='GridBased',use_start=True)
+    #print(len(ans.poses))
     
     
-    waypoints = []
-    shelf_poses =   [(1.5, 0.5), (2.5, 0.5)]
+    waypoints1 = []
+    shelf_poses1 =   [(1.0, -0.5), (0.5, -0.5), (0.0, -0.5)]
+    waypoints2 = []
+    shelf_poses2 =   [(1.0, 0.5), (0.5, 0.5), (0.0, 0.5)]
     # --- Create some Nav2 goal poses ---
-    for i in range(len(shelf_poses)):
-        waypoints.append(create_pose_stamped(nav, shelf_poses[i][0], shelf_poses[i][1], 0.0))
+    for i in range(len(shelf_poses1)):
+        waypoints1.append(create_pose_stamped(nav1, shelf_poses1[i][0], shelf_poses1[i][1], 0.0))
+        waypoints2.append(create_pose_stamped(nav2, shelf_poses2[i][0], shelf_poses2[i][1], 0.0))
     # --- Going to one pose ---
     #nav.goToPose(goal_pose1)
     #while not nav.isTaskComplete():
@@ -60,15 +65,16 @@ def main():
 
     # --- Follow Waypoints ---
     # for i in range(3):
-    nav.followWaypoints(waypoints)
-
-    while not nav.isTaskComplete():
+    nav1.followWaypoints(waypoints1)
+    nav2.followWaypoints(waypoints2)
+    while not nav2.isTaskComplete() or not nav1.isTaskComplete():
         pass
     #         feedback = nav.getFeedback()
     #         # print(feedback)
 
     # --- Get the result ---
-    print(nav.getResult())
+    print(nav1.getResult())
+    print(nav2.getResult())
   
 
     # --- Shutdown ROS2 communications ---
