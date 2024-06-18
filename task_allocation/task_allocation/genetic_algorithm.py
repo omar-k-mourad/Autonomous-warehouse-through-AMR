@@ -294,7 +294,7 @@ def genetic_alg(pop_size, MaxEpoc, crossover_rate, num_robots, num_tasks, elitis
             print(f"population {i} :\n{population[0]}")
 
 
-    print("final population: {population}")
+    print(f"final population: {population}")
     print(f"fitness of last pop: {costs.fitness(population[0])}")
 
     return population
