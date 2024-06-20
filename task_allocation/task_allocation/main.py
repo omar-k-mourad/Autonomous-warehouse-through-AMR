@@ -22,8 +22,8 @@ def main():
     MaxEpoc = 10000
     crossover_rate = 0.95
     elitist_precentage = 20
-    distance_strategy = euclidean_distance
-    nav = None
+    distance_strategy = nav_distance
+    nav = nav
 
     robot_tasks = genetic_alg(
         pop_size=pop_size,
