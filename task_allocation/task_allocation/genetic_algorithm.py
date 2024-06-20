@@ -4,6 +4,8 @@ import time
 import math
 
 picking_stations = [(0.0,-2.0), (-1.0,-2.0), (1.0,-2.0)]
+task_shelves_coordinates =  [(2.0, 0.6), (2.0, 0.0), (2.0, -0.6),
+                                (0.2, -0.4), (0.2, -0.6), (-2.0, 0.6)]
 intial_mutation_rate = 0.1
 final_mutation_rate = 0.5
 
@@ -296,10 +298,25 @@ def genetic_alg(pop_size, MaxEpoc, crossover_rate, num_robots, num_tasks, elitis
         if i % 100 == 0:
             print(f"population {i} :\n{population[0]}")
 
-
-    print("final population: {population}")
-    print(f"fitness of last pop: {costs.fitness(population[0])}")
+    
+    print(f"final chromosome: {population[0]}")
+    print(f"fitness of last chromosome: {costs.fitness(population[0])}")
+    shelf_list = costs.split_chromosome(population[0])
+    print(f"shelf_list:\n{shelf_list}")
     W = costs.get_W()
+    picking_list = [item[1] for item in W]
     print(f"W:\n{W}")
+    print(f"picking_list:\n{picking_list}")
 
-    return population
+    robots_tasks= []
+    for i in range(num_robots):
+        robot_shelfs = []
+        robot_tasks = []
+        robot_shelfs = shelf_list[i]
+        for shelf in robot_shelfs:
+            robot_tasks.append((shelf , picking_list[shelf - 1]))
+        robots_tasks.append(robot_tasks)
+
+    print(f"robots_tasks (shelf, pick_station):\n{robots_tasks}")
+
+    return robots_tasks
