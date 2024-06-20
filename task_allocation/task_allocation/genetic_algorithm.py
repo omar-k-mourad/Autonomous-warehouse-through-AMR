@@ -47,12 +47,14 @@ class Costs:
         ]     
 
     def create_W(self, tasks_coordinates):
-        #Wi --> W[i]  : cost of task i
+        #Wi --> W[i][0]  : cost of task i
         return [self.cost_of_task(task_coordinate, picking_stations) for task_coordinate in tasks_coordinates]
 
     def cost_of_task(self, task_coordinate, picking_stations):
-        
-        return min(2 * euclidean_distance(station, task_coordinate) for station in picking_stations)
+        costs = [2 * euclidean_distance(station, task_coordinate) for station in picking_stations]
+        min_cost = min(costs)
+        min_index = costs.index(min_cost)
+        return (min_cost, min_index)
     
     def get_Di(self, robot_no, task_no):
         """
@@ -66,8 +68,9 @@ class Costs:
         return sum([self.C[task_pool[i] - 1][task_pool[i+1] - (task_pool[i] + 1)] for i in range(lenght - 1)])
 
     def get_Wi(self, task_pool):
-        return sum([self.W[task - 1] for task in task_pool])
-    
+        return sum([self.W[task - 1][0] for task in task_pool])
+    def get_W(self):
+        return self.W
     #ITC calculation 
     def calc_ITC(self, robot_num, task_pool):
         """
@@ -194,8 +197,7 @@ def generate_population(num_robots, num_tasks, num_chromosomes):
     
     return population
 
-def selection_roulette(population, fitness_function, n):
-    weights=[fitness_function(chromosome) for chromosome in population]
+def selection_roulette(population, weights, n):
     selected_individuals = random.choices(population, weights=weights, k=n)
     return selected_individuals
 
@@ -252,7 +254,7 @@ def genetic_alg(pop_size, MaxEpoc, crossover_rate, num_robots, num_tasks, elitis
     print("Calculating C,D and W....")
     start = time.time()  
     costs = Costs(num_robots, num_tasks)
-    costs.update_Costs(robots_coordinates, robots_poses, task_shelves_coordinates, task_shelves_poses, distance_strag)
+    costs.update_Costs(robots_coordinates, robots_poses, task_shelves_coordinates, task_shelves_poses, distance_strag, nav)
     end = time.time()
     print("C,D and W creation time : ", end - start," s")
 
@@ -267,6 +269,7 @@ def genetic_alg(pop_size, MaxEpoc, crossover_rate, num_robots, num_tasks, elitis
     for i in range(MaxEpoc):
 
         next_generation = []
+        weights=[fitness_function(chromosome) for chromosome in population]
         
         # Set the alterable mutation rate Pm according to the actual evolution generations
         if i < 1000:
@@ -280,7 +283,7 @@ def genetic_alg(pop_size, MaxEpoc, crossover_rate, num_robots, num_tasks, elitis
         next_generation = elitist_population[:]
 
         for _ in range(int( (pop_size - len(elitist_population)) / 2) ):
-            parents = selection_roulette(population, fitness_function, 2)
+            parents = selection_roulette(population, weights, 2)
             # if random (0, 1) < Pc then Crossover individuals in pairs by a variation of the order crossover operator
             offspring_a, offspring_b = order_crossover(parents, crossover_rate)
             # if random (0, 1) < Pm then Mutate an individual by swap mutation
@@ -294,8 +297,9 @@ def genetic_alg(pop_size, MaxEpoc, crossover_rate, num_robots, num_tasks, elitis
             print(f"population {i} :\n{population[0]}")
 
 
-    print(f"final population: {population}")
+    print("final population: {population}")
     print(f"fitness of last pop: {costs.fitness(population[0])}")
+    W = costs.get_W()
+    print(f"W:\n{W}")
 
     return population
-
