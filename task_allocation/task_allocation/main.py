@@ -38,7 +38,7 @@ def main():
         task_shelves_poses=task_shelves_poses, 
         distance_strag=distance_strategy,
         nav=nav)
-    '''
+    
     nav_list = []
     robots_waypoints = []
 
@@ -69,7 +69,7 @@ def main():
     for nav in nav_list:
         print(nav.getResult())
     
-    '''
+
 
     rclpy.shutdown()
 
