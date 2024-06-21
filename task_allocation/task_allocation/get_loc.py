@@ -27,7 +27,7 @@ class MinimalSubscriber(Node):
 
     def listener_callback(self, msg, robot_name):
         x = msg.pose.pose.position.x
-        y = msg.pose.pose.position.x
+        y = msg.pose.pose.position.y
         self.get_logger().info(f'I heard from {robot_name}: "%s"' % msg.pose.pose.position.x)
         self.robot_pose_dic[robot_name] = (x,y)
         print(f'\n{self.robot_pose_dic}')
