@@ -41,6 +41,15 @@ def reduce_response(response, desired_keys):
 
     return reduced_response
 
+def extract_product_and_shelf(data):
+    result = []
+    for item in data:
+        product_and_shelf = {
+            'product_id': item['product_id'],
+            'shelfID': item['shelfID']
+        }
+        result.append(product_and_shelf)
+    return result
 
 def Transform_response(response):
   """
@@ -71,7 +80,7 @@ def Transform_response(response):
   shelves = {}
 
   for product in response:
-    product_id = product["productID"]
+    product_id = product["product_id"]
     shelf_id = product["shelfID"]
 
     unique_products.add(product_id)
