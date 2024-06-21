@@ -1,5 +1,6 @@
+from fetching_orderProducts_with_shelfIDs import get_shelves_locations
 
-def min_shelves_greedy(warehouse, order_items, shelfIDs):
+def min_shelves_greedy(warehouse, order_items, shelfIDs, dynamodb):
   """
   This function uses a greedy approach to find the minimum number of shelves 
   required to pick all items in the order, and returns the list of shelves to visit.
@@ -36,15 +37,18 @@ def min_shelves_greedy(warehouse, order_items, shelfIDs):
       remaining_items -= set(warehouse[best_shelf])
 
   extracted_shelfs = [shelfIDs[i] for i in list(visited_shelves)]
+  shelves_locations = get_shelves_locations(dynamodb)
+  shelves_to_pick = []
+  for i in range(len(extracted_shelfs)):
+    shelves_to_pick.append(shelves_locations[extracted_shelfs[i]])
 
-  return extracted_shelfs
+  return shelves_to_pick
 
+
+"""
 # Example usage
 warehouse = [['1', '3', '2'], ['1']]
 order_items = ['2', '1', '3']
 shelfIDS = ['2', '4']
-    
-shelves_to_pick = min_shelves_greedy(warehouse, order_items, shelfIDS)
 
-print(f"Shelves to pick: {shelves_to_pick}")
-
+"""
