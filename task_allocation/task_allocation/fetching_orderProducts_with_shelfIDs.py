@@ -47,11 +47,11 @@ def receive_and_process_messages(sqs_client, queue_url):
 # Function to fetch order products with associated shelf IDs
 def fetching_order_products_with_shelf_IDs(dynamodb, sqs_client, queue_url):
     #order_products = receive_and_process_messages(sqs_client, queue_url)
-    #print(order_products)
     order_products = [{'product_id': '7381daac-236f-42b1-8b45-7348d90c68ba', 'quantity': '1'}, {'product_id': '3aaa19ac-592d-4a5a-8c43-062bbbcb3f5e', 'quantity': '1'}, {'product_id': '9fb10680-365f-4cef-ba2f-22b5dd12b662', 'quantity': '1'}, {'product_id': 'c0c6ab69-62d1-4944-83fe-c14b95c85313', 'quantity': '1'}, {'product_id': 'c0c6ab69-62d1-4944-83fe-c14b95c85313', 'quantity': '7'}]
     # Get the 'ShelfProducts' table
     shelf_products_table = dynamodb.Table('ShelfProducts-ei5ggzbrrjghbe3yjny255f35q-dev')
 
+    order_products_with_shelf_IDs = []
     # Iterate over each order product
     for order_product in order_products:
         # Get the product ID for the current order product
@@ -68,18 +68,13 @@ def fetching_order_products_with_shelf_IDs(dynamodb, sqs_client, queue_url):
         
         # Extract the list of items from the shelf response
         shelf_products = product_shelfIDs_response['Items']
-        shelves_locations = get_shelves_locations(dynamodb)
         # If a shelf ID is found, assign it to the current order product; otherwise, set it to None
         if shelf_products:
-            shelf_id = shelf_products[0]['shelfID']
-            order_product['shelfID'] = shelf_id
-            order_product['shelfLoc'] = shelves_locations[shelf_id]
-        else:
-            order_product['shelfID'] = None
-            order_product['sheflLoc'] = None
-    return  order_products
+            for shelf_product in shelf_products:
+                order_products_with_shelf_IDs.append({'productID': product_id, 'quantity':order_product['quantity'],'shelfID': shelf_product['shelfID']})
+    return  order_products_with_shelf_IDs
 
-#print(fetching_order_products_with_shelf_IDs(dynamodb, sqs_client, queue_url))
+print(fetching_order_products_with_shelf_IDs(dynamodb, sqs_client, queue_url))
 
 
 

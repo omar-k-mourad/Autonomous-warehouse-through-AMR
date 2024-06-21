@@ -33,7 +33,7 @@ def main():
     task_shelves_poses = make_pose_stamps(task_shelves_coordinates, nav)
     
     
-    robots_num = 3
+    robots_num = 2
     robots_dict = make_robots_dict("pose.csv")
     robots_coordinates = robots_dict.values()
     robots_poses = make_pose_stamps(robots_coordinates, nav)
