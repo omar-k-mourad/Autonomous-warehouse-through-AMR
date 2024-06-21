@@ -29,7 +29,6 @@ def main():
     task_shelves_coordinates = [ast.literal_eval(item) for item in shelves_to_pick]
     print(task_shelves_coordinates)
 
-    """ 
     tasks_num = len(task_shelves_coordinates)
     task_shelves_poses = make_pose_stamps(task_shelves_coordinates, nav)
     
