@@ -20,8 +20,7 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'listener = task_allocation.get_loc:main',
-            'talker = task_allocation.main:main',
+            'get_loc = task_allocation.get_loc:main',
         ],
     },
 )

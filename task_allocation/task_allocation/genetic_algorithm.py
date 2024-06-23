@@ -103,7 +103,8 @@ class Costs:
             BU = min(ITCs) / max(ITCs)
             max_test = self.tasks_num
             total_test = sum(range(self.tasks_num + 1))
-            f = 55
+            # calculate factor for max test and total test to balance BU, TT and TTC
+            f = 130 - (7 * max_test) if (130 - (7 * max_test)) > 0 else 1
             fitness_score = (total_test / TTC)*f + (max_test / TT)*f + BU
             return fitness_score
 
