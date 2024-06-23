@@ -3,9 +3,6 @@ from nav2_commander import *
 import time
 import math
 
-picking_stations = [(0.0,-2.0), (-1.0,-2.0), (1.0,-2.0)]
-task_shelves_coordinates =  [(2.0, 0.6), (2.0, 0.0), (2.0, -0.6),
-                                (0.2, -0.4), (0.2, -0.6), (-2.0, 0.6)]
 intial_mutation_rate = 0.1
 final_mutation_rate = 0.5
 
@@ -17,14 +14,15 @@ class Costs:
         self.robots_num = robots_num
         self.tasks_num = tasks_num
 
-    def update_Costs(self, robots_coordinates, robots_poses, task_shelves_coordinates, task_shelves_poses, distance_f, nav=None):
+    def update_Costs(self, robots_coordinates, robots_poses, task_shelves_coordinates, task_shelves_poses, distance_f,picking_stations_coordinates, picking_stations_poses, nav=None):
         if nav is not None:
             self.C = self.create_C(task_shelves_poses, distance_f, nav)
             self.D = self.create_D(robots_poses, task_shelves_poses, distance_f, nav)
+            self.W = self.create_W(task_shelves_poses, picking_stations_poses, distance_f, nav)
         else:
             self.C = self.create_C(task_shelves_coordinates, distance_f)
             self.D = self.create_D(robots_coordinates, task_shelves_coordinates, distance_f)
-        self.W = self.create_W(task_shelves_coordinates)
+            self.W = self.create_W(task_shelves_coordinates, picking_stations_coordinates, distance_f)
 
     
     #C,D and W functions
@@ -48,15 +46,21 @@ class Costs:
             for robot_pose in robots_poses
         ]     
 
-    def create_W(self, tasks_coordinates):
+    def create_W(self, tasks_poses, picking_stations_poses, distance_f, nav=None):
         #Wi --> W[i][0]  : cost of task i
-        return [self.cost_of_task(task_coordinate, picking_stations) for task_coordinate in tasks_coordinates]
+        if nav is not None:
+            return [self.cost_of_task(task_pose, picking_stations_poses, distance_f, nav) for task_pose in tasks_poses]
+        else:
+            return [self.cost_of_task(task_pose, picking_stations_poses, distance_f) for task_pose in tasks_poses]
 
-    def cost_of_task(self, task_coordinate, picking_stations):
-        costs = [2 * euclidean_distance(station, task_coordinate) for station in picking_stations]
+    def cost_of_task(self, task_pose, picking_stations_poses, distance_f, nav=None):
+        if nav is not None:
+            costs = [2 * distance_f(station_pose, task_pose, nav) for station_pose in picking_stations_poses]
+        else:
+            costs = [2 * distance_f(station_pose, task_pose) for station_pose in picking_stations_poses]
         min_cost = min(costs)
         min_index = costs.index(min_cost)
-        return (min_cost, min_index)
+        return (min_cost, min_index)           
     
     def get_Di(self, robot_no, task_no):
         """
@@ -99,7 +103,8 @@ class Costs:
             BU = min(ITCs) / max(ITCs)
             max_test = self.tasks_num
             total_test = sum(range(self.tasks_num + 1))
-            fitness_score = (total_test / TTC) + (max_test / TT) + BU 
+            f = 55
+            fitness_score = (total_test / TTC)*f + (max_test / TT)*f + BU
             return fitness_score
 
     def split_chromosome(self, chromosome):
@@ -178,7 +183,7 @@ def make_robots_dict(file_name):
             x = float(x.strip())
             y = float(y.strip())
             dict[robot_name] = (x , y) 
-
+        print("dict", dict)
         return dict
 
 def generate_population(num_robots, num_tasks, num_chromosomes):
@@ -250,20 +255,22 @@ def swap_mutation(chromosome, mutation_rate):
 
 # Initialize parameters: population size Popsize, maximal generations MaxEpoc, crossover rate Pc
 def genetic_alg(pop_size, MaxEpoc, crossover_rate, num_robots, num_tasks, elitist_precentage,
-                robots_coordinates, robots_poses, task_shelves_coordinates, task_shelves_poses, distance_strag, nav):
+                robots_coordinates, robots_poses, task_shelves_coordinates, task_shelves_poses, distance_strag, picking_stations_coordinates, picking_stations_poses, nav):
 
     #calculate the distances between different task orders
     print("Calculating C,D and W....")
     start = time.time()  
     costs = Costs(num_robots, num_tasks)
-    costs.update_Costs(robots_coordinates, robots_poses, task_shelves_coordinates, task_shelves_poses, distance_strag, nav)
+    costs.update_Costs(robots_coordinates, robots_poses, task_shelves_coordinates, task_shelves_poses, distance_strag,picking_stations_coordinates, picking_stations_poses, nav)
     end = time.time()
     print("C,D and W creation time : ", end - start," s")
+    print("C:", costs.C)
+    print("D:", costs.D)
+    print("W:", costs.W)
+
 
     # Generate an population of feasible solutions randomly
     population = generate_population(num_robots, num_tasks, pop_size)
-
-    print(f"Initial population : \n{population}")
 
     fitness_function = costs.fitness
 
@@ -296,7 +303,8 @@ def genetic_alg(pop_size, MaxEpoc, crossover_rate, num_robots, num_tasks, elitis
 
         population = next_generation
         if i % 100 == 0:
-            print(f"population {i} :\n{population[0]}")
+            print(f"chromosome {i} :\n{population[0]}")
+            print(f"fitness of {i} chromosome: {costs.fitness(population[0])}")
 
     
     print(f"final chromosome: {population[0]}")
@@ -305,7 +313,6 @@ def genetic_alg(pop_size, MaxEpoc, crossover_rate, num_robots, num_tasks, elitis
     print(f"shelf_list:\n{shelf_list}")
     W = costs.get_W()
     picking_list = [item[1] for item in W]
-    print(f"W:\n{W}")
     print(f"picking_list:\n{picking_list}")
 
     robots_tasks= []

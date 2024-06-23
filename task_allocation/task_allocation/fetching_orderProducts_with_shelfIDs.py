@@ -74,7 +74,6 @@ def fetching_order_products_with_shelf_IDs(dynamodb, sqs_client, queue_url):
                 order_products_with_shelf_IDs.append({'productID': product_id, 'quantity':order_product['quantity'],'shelfID': shelf_product['shelfID']})
     return  order_products_with_shelf_IDs
 
-print(fetching_order_products_with_shelf_IDs(dynamodb, sqs_client, queue_url))
 
 
 

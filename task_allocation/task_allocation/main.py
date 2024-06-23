@@ -10,6 +10,7 @@ import ast
 def main():
     rclpy.init()
     nav = BasicNavigator()
+    """ 
     # Initialize the DynamoDB resource
     dynamodb = boto3.resource('dynamodb')
 
@@ -28,15 +29,17 @@ def main():
     shelves_to_pick = min_shelves_greedy(warehouse, order_items, shelfIDs, dynamodb)
     task_shelves_coordinates = [ast.literal_eval(item) for item in shelves_to_pick]
     print(task_shelves_coordinates)
-
+    """
+    task_shelves_coordinates = [(2.0, 0.4), (2.0, 0.0), (2.0, -0.4), (0.2, -0.6), (0.0, 0.6), (0.0, -0.6), (1.4, -0.6), (1.0, 0.6), (1.0, -0.6), (2.0, 0.6)]
     tasks_num = len(task_shelves_coordinates)
     task_shelves_poses = make_pose_stamps(task_shelves_coordinates, nav)
-    
-    
     robots_num = 2
     robots_dict = make_robots_dict("pose.csv")
     robots_coordinates = robots_dict.values()
     robots_poses = make_pose_stamps(robots_coordinates, nav)
+    picking_stations_coordinates = [(0.0,-2.0), (-1.0,-2.0), (1.0,-2.0)]
+    picking_stations_poses = make_pose_stamps(picking_stations_coordinates, nav)
+    print("robots coords", robots_coordinates)
 
     pop_size = 100
     MaxEpoc = 10000
@@ -57,6 +60,8 @@ def main():
         task_shelves_coordinates=task_shelves_coordinates, 
         task_shelves_poses=task_shelves_poses, 
         distance_strag=distance_strategy,
+        picking_stations_coordinates = picking_stations_coordinates,
+        picking_stations_poses=picking_stations_poses,
         nav=nav)
     
     nav_list = []
@@ -74,7 +79,7 @@ def main():
         waypoints = []
         for task in robot:
             waypoints.append(create_pose_stamped(nav, task_shelves_coordinates[task[0] - 1][0], task_shelves_coordinates[task[0] - 1][1], 0.0))
-            waypoints.append(create_pose_stamped(nav, picking_stations[task[1]][0], picking_stations[task[1]][1], 0.0))
+            waypoints.append(create_pose_stamped(nav, picking_stations_coordinates[task[1]][0], picking_stations_coordinates[task[1]][1], 0.0))
         robots_waypoints.append(waypoints)
     print("Starting Navigation.....")
     for i, nav in enumerate(nav_list):

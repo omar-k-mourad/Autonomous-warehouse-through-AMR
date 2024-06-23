@@ -45,7 +45,7 @@ def extract_product_and_shelf(data):
     result = []
     for item in data:
         product_and_shelf = {
-            'product_id': item['product_id'],
+            'product_id': item['productID'],
             'shelfID': item['shelfID']
         }
         result.append(product_and_shelf)
