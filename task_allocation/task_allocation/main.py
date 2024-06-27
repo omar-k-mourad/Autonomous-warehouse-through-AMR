@@ -1,14 +1,15 @@
 from nav2_commander import *
 from genetic_algorithm import *
-from fetching_orderProducts_with_shelfIDs import *
+from order_processing import *
 from set_cover_greedy import *
 from clean_data import *
 import ast
 import time
+import boto3
 
 def create_robot_tasks(dynamodb, sqs_client, queue_url):
     #getting orders from database and adding it to queue
-    order_products = fetching_order_products_with_shelf_IDs(dynamodb, sqs_client, queue_url)
+    order_products = fetch_order_products_with_shelf_ids(dynamodb, sqs_client, queue_url)
     print("order products:", order_products)
     reduced_order_products_shelves = extract_product_and_shelf(order_products)
     print("rduced", reduced_order_products_shelves)
