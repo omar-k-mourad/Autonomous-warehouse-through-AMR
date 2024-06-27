@@ -2,164 +2,14 @@ import random
 from nav2_commander import *
 import time
 import math
+from costs import Costs
 
 intial_mutation_rate = 0.1
 final_mutation_rate = 0.5
 
-class Costs:
-    def __init__(self, robots_num, tasks_num):
-        self.C = [[]]
-        self.D = [[]]
-        self.W = []
-        self.robots_num = robots_num
-        self.tasks_num = tasks_num
-
-    def update_Costs(self, robots_coordinates, robots_poses, task_shelves_coordinates, task_shelves_poses, distance_f,picking_stations_coordinates, picking_stations_poses, nav=None):
-        if nav is not None:
-            self.C = self.create_C(task_shelves_poses, distance_f, nav)
-            self.D = self.create_D(robots_poses, task_shelves_poses, distance_f, nav)
-            self.W = self.create_W(task_shelves_poses, picking_stations_poses, distance_f, nav)
-        else:
-            self.C = self.create_C(task_shelves_coordinates, distance_f)
-            self.D = self.create_D(robots_coordinates, task_shelves_coordinates, distance_f)
-            self.W = self.create_W(task_shelves_coordinates, picking_stations_coordinates, distance_f)
-
-    
-    #C,D and W functions
-    def create_C(self, tasks_poses, distance_f, nav=None):
-        # Cij --> C[i-1][j-(i+1)] : travel cost from ti to tj       condition: i < j
-        return [
-            [
-                distance_f(tasks_poses[i], tasks_poses[j], nav) if nav is not None else distance_f(tasks_poses[i], tasks_poses[j])
-                for j in range(i + 1, self.tasks_num)
-            ]
-            for i in range(self.tasks_num - 1)
-        ]
-
-    def create_D(self, robots_poses, tasks_poses, distance_f, nav=None):
-        #Dij --> D[i][j] : travel cost from robot i to task j
-        return [
-            [
-                distance_f(robot_pose, task_pose, nav) if nav is not None else distance_f(robot_pose, task_pose)
-                for task_pose in tasks_poses
-            ]
-            for robot_pose in robots_poses
-        ]     
-
-    def create_W(self, tasks_poses, picking_stations_poses, distance_f, nav=None):
-        #Wi --> W[i][0]  : cost of task i
-        if nav is not None:
-            return [self.cost_of_task(task_pose, picking_stations_poses, distance_f, nav) for task_pose in tasks_poses]
-        else:
-            return [self.cost_of_task(task_pose, picking_stations_poses, distance_f) for task_pose in tasks_poses]
-
-    def cost_of_task(self, task_pose, picking_stations_poses, distance_f, nav=None):
-        if nav is not None:
-            costs = [2 * distance_f(station_pose, task_pose, nav) for station_pose in picking_stations_poses]
-        else:
-            costs = [2 * distance_f(station_pose, task_pose) for station_pose in picking_stations_poses]
-        min_cost = min(costs)
-        min_index = costs.index(min_cost)
-        return (min_cost, min_index)           
-    
-    def get_Di(self, robot_no, task_no):
-        """
-        task_no: first task in a pool
-        """
-        Di = self.D[robot_no][task_no - 1]
-        return Di
-
-    def get_Cij(self, task_pool, lenght):
-        task_pool = sorted(task_pool)
-        return sum([self.C[task_pool[i] - 1][task_pool[i+1] - (task_pool[i] + 1)] for i in range(lenght - 1)])
-
-    def get_Wi(self, task_pool):
-        return sum([self.W[task - 1][0] for task in task_pool])
-    def get_W(self):
-        return self.W
-    #ITC calculation 
-    def calc_ITC(self, robot_num, task_pool):
-        """
-        ITC(ri, Ti)
-        robot_num: ri
-        task_pool: list of tasks numbers in a task pool (Ti)
-        """
-        lenght = len(task_pool)
-        Di = self.get_Di(robot_num, task_pool[0]) #travel cost from ri to t1,  t1: first task in the pool
-        Ci = self.get_Cij(task_pool, lenght) #Sum of travel costs between tasks in the pool
-        Wi = self.get_Wi(task_pool) #Sum of costs for tasks in the pool
-        ITC = Di + Ci + Wi
-        return ITC
-    
-    #Fitness
-    def fitness(self, chromosome):
-        if self.bad_chromsome(chromosome):
-            return 0
-        else:
-            task_poles = self.split_chromosome(chromosome)
-            ITCs = [self.calc_ITC(i, task_poles[i]) for i in range(self.robots_num)]
-            TTC = sum(ITCs)
-            TT = max(ITCs)
-            BU = min(ITCs) / max(ITCs)
-            max_test = self.tasks_num
-            total_test = sum(range(self.tasks_num + 1))
-            # calculate factor for max test and total test to balance BU, TT and TTC
-            f = 130 - (7 * max_test) if (130 - (7 * max_test)) > 0 else 1
-            fitness_score = (total_test / TTC)*f + (max_test / TT)*f + BU
-            return fitness_score
-
-    def split_chromosome(self, chromosome):
-        """
-        Splits a chromosome representation (list of integers) into a list of lists,
-        representing task assignments for each robot.
-
-        Args:
-            chromosome (list): The chromosome representation as a list of integers.
-
-        Returns:
-            list: A list of lists, where each inner list represents the tasks assigned to a robot.
-
-        Raises:
-            ValueError: If the chromosome length is invalid or the chromosome contains non-numeric elements.
-        """
-        # Check for valid chromosome length
-        expected_length = (self.tasks_num + self.robots_num - 1)
-        if len(chromosome) != expected_length:
-            raise ValueError(f"Invalid chromosome length: expected {expected_length}, got {len(chromosome)}")
-
-        # Check for numeric elements (already integers in this case)
-        if not all(isinstance(element, int) for element in chromosome):
-            raise ValueError("Chromosome must contain only integers")
-
-        # Split the chromosome into sections based on virtual tasks
-        robot_tasks = []
-        current_robot = []
-        for task in chromosome:
-            if task <= self.tasks_num:  # Task belongs to the current robot
-                current_robot.append(task)
-            else:  # Virtual task, signifies end of current robot's tasks
-                robot_tasks.append(current_robot)
-                current_robot = []
-        robot_tasks.append(current_robot)  # Add the last robot's tasks
-
-        return robot_tasks
-    
-    def bad_chromsome(self, chromosome):
-
-        current_robot = []
-        for task in chromosome:
-            if task <= self.tasks_num:  # Task belongs to the current robot
-                current_robot.append(task)
-            else:  # Virtual task, signifies end of current robot's tasks
-                if len(current_robot) == 0:
-                    return True
-                current_robot = []
-        if len(current_robot) == 0:
-            return True
-        return False
-
 #Distance functions
 def nav_distance(pose1, pose2, nav):
+    """Calculate the distance between two points using nav2 planner."""
     return len((nav.getPath(start = pose1, goal = pose2, planner_id='GridBased',use_start=True)).poses)
 
 def euclidean_distance(coord1, coord2):
@@ -174,7 +24,18 @@ def make_pose_stamps(coordinates, nav):
     return pose_stamps
 
 def make_robots_dict(file_name):
-    dict = {}
+    """
+    This function uses extract robot locations from file
+
+    Args:
+        file_name: name of file.
+
+    Returns:
+        robot_coordinte_dict : dictionary of robot name and it's coordinate
+
+    sample output : {'robot1': (1.8692384106109388, -0.17030886256819153), 'robot2': (0.3829515348145183, 2.0063998491107764)}
+    """
+    robot_coordinte_dict = {}
     # Open the file in read mode
     with open(file_name, 'r') as file:
         # Iterate over each line in the file
@@ -183,14 +44,23 @@ def make_robots_dict(file_name):
             x,y = xy.strip()[1:-1].split(",")
             x = float(x.strip())
             y = float(y.strip())
-            dict[robot_name] = (x , y) 
+            robot_coordinte_dict[robot_name] = (x , y) 
         print("dict", dict)
-        return dict
+        return robot_coordinte_dict
 
 def generate_population(num_robots, num_tasks, num_chromosomes):
-    # Calculate the length of the chromosome
-    chromosome_length = num_robots + num_tasks - 1
-    
+    """
+    This function randomly generates the initital population for the genetic alogrithm where each chromosome
+    depends on the number of robots and num_tasks
+
+    Args:
+        num_robots: the number of robots that are available.
+        num_tasks : number of tasks / shelfs to be retrived.
+        num_chromosomes : the size of the population
+
+    Returns:
+        population : is a list of chromosomes of size num_chromosmes
+    """
     # Initialize an empty list to store the chromosomes
     population = []
     
@@ -206,15 +76,49 @@ def generate_population(num_robots, num_tasks, num_chromosomes):
     return population
 
 def selection_roulette(population, weights, n):
+    """
+    This function selects n chromosmes from the population based on their weight
+    where chromosomes with higher weight have more chance to be selected.
+
+    Args:
+        population: list of chromosmes. 
+        weights : the fitness of each chromosome.
+        n : the number of chromosome to select.
+
+    Returns:
+        selected_individuals : list of n selected chromosomes.
+    """
     selected_individuals = random.choices(population, weights=weights, k=n)
     return selected_individuals
 
 def selection_elitist(population, fitness_function, precentage):
+    """
+    This function returns etilist precentage of population.
+
+    Args:
+        population: list of chromosmes. 
+        fitness_function : refrenced function to calculate the fitness.
+        precentage : the precentage of etilist to be returned.
+
+    Returns:
+        selected_individuals : list of etilist precentage of population
+    """
     sorted_population =  sorted(population, key=fitness_function, reverse=True)
     elitist_population_count = int((precentage / 100) * len(population))
     return sorted_population[:elitist_population_count + 1]
 
 def order_crossover(parents, crossover_rate):
+    """
+    This function preforms order crossover, where two offsprings are produced from two parents,
+    based on a certain rate of crossover.
+
+    Args:
+        parents: list of two parents. 
+        crossover_rate : rate at which crossover should occur.
+
+    Returns:
+        selected_individuals : list of etilist precentage of population
+    """
     '''
     (9 3 4 8 10 2 1 6 5 7)
     (2 5 7 10 9 1 8 4 6 3)
@@ -227,6 +131,7 @@ def order_crossover(parents, crossover_rate):
     '''
     if random.random() < crossover_rate:
         offsprings = []
+        #select cross point
         cross = round(len(parents[0]) / 3)
         offsprings.append(parents[1][cross:-cross])
         offsprings.append(parents[0][cross:-cross])
@@ -328,3 +233,7 @@ def genetic_alg(pop_size, MaxEpoc, crossover_rate, num_robots, num_tasks, elitis
     print(f"robots_tasks (shelf, pick_station):\n{robots_tasks}")
 
     return robots_tasks
+
+
+
+print(make_robots_dict("pose.csv"))
