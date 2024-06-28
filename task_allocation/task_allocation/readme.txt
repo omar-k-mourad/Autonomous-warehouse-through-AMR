@@ -4,15 +4,7 @@
     sudo apt install awscli
 - configure aws
     aws configure (use access key and secret access key provided from the AWS IAM and the region the services is used in)
-- setup the envirnoment
-    in terminal create an envirnoment :
-        python3 -m venv .venv
-    activate envirnoment:
-        source ./.venv/bin/activate
-    test the env (running the file):
-        python3 config.py
-    installing boto3 to connect to aws:
-        create a requirments.txt file and add boto3
+- install requriments
         pip3 install -r requirements.txt -t ./.venv/lib/python(write ur version)/site-packages/
 
 #### set_cover_greedy ####
