@@ -4,9 +4,6 @@ import time
 import math
 from costs import Costs
 
-intial_mutation_rate = 0.1
-final_mutation_rate = 0.5
-
 #Distance functions
 def nav_distance(pose1, pose2, nav):
     """Calculate the distance between two points using nav2 planner."""
@@ -113,29 +110,30 @@ def order_crossover(parents, crossover_rate):
     based on a certain rate of crossover.
 
     Args:
-        parents: list of two parents. 
+        parents: list containing two parents. 
         crossover_rate : rate at which crossover should occur.
 
     Returns:
-        selected_individuals : list of etilist precentage of population
-    """
-    '''
-    (9 3 4 8 10 2 1 6 5 7)
-    (2 5 7 10 9 1 8 4 6 3)
-
-    (9 3 4 | 8 10 2 1 | 6 5 7) 
-    (2 5 7 | 10 9 1 8 | 4 6 3)
+        two offsprings
     
-    (8 10 2 1 5 7 9 4 6 3)
-    (10 9 1 8 3 4 2 6 5 7)
-    '''
+    crossover example :
+        parent 1 : (9 3 4 8 10 2 1 6 5 7)
+        parent 2 : (2 5 7 10 9 1 8 4 6 3)
+
+        cross parent 1 : (9 3 4 | ->8 10 2 1<- | 6 5 7) 
+        cross parent 2 : (2 5 7 | ->10 9 1 8<- | 4 6 3)
+    
+        offspring 1 : (8 10 2 1 5 7 9 4 6 3)
+        offspring 2 : (10 9 1 8 3 4 2 6 5 7)
+    """
+    # preform crossover by the chosen rate
     if random.random() < crossover_rate:
         offsprings = []
         #select cross point
         cross = round(len(parents[0]) / 3)
+        # preform crossover
         offsprings.append(parents[1][cross:-cross])
         offsprings.append(parents[0][cross:-cross])
-
         for i in range(2):
             for element in parents[i]:
                 if element not in offsprings[i]:
@@ -145,24 +143,49 @@ def order_crossover(parents, crossover_rate):
         return parents[0], parents[1]
     
 def swap_mutation(chromosome, mutation_rate):
-  # Randomly select two distinct indices for swapping
-  if len(chromosome) < 2:
-    return chromosome  # Handle case with less than 2 genes
-  
+    """
+    This function Randomly select two distinct indices and swap them, according to mutation rate.
 
-  if random.random() < mutation_rate:  
-    index1 = random.randint(0, len(chromosome) - 1)
-    index2 = random.randint(0, len(chromosome) - 1)
+    Args:
+        mutation_rate : rate at which mutation_rate should occur.
 
-    # Perform the swap
-    chromosome[index1], chromosome[index2] = chromosome[index2], chromosome[index1]
+    Returns:
+        chromosome : chromosome after swap
+    
+    mutation example :
+        inptut chromosome : (9 3 4 8 10 2 1 6 5 7)
+        output chromosome : (7 3 4 8 10 2 1 6 5 9)
+    """
+    # Handle case with less than 2 genes
+    if len(chromosome) < 2:
+        return chromosome  
+    # preform mutation by the chosen rate
+    if random.random() < mutation_rate:  
+        index1 = random.randint(0, len(chromosome) - 1)
+        index2 = random.randint(0, len(chromosome) - 1)
 
-  return chromosome
+        # Perform the swap
+        chromosome[index1], chromosome[index2] = chromosome[index2], chromosome[index1]
+
+    return chromosome
 
 # Initialize parameters: population size Popsize, maximal generations MaxEpoc, crossover rate Pc
 def genetic_alg(pop_size, MaxEpoc, crossover_rate, num_robots, num_tasks, elitist_precentage,
                 robots_coordinates, robots_poses, task_shelves_coordinates, task_shelves_poses, distance_strag, picking_stations_coordinates, picking_stations_poses, nav):
+    """
+    Genetic algorithm for efficient task allocation
 
+    Args:
+        pop_size: size of the population.
+        MaxEpoc : the number of iteration the algorithm will run for to find a solution
+
+    Returns:
+        robots_tasks : list of list where each list represnt a set of tasks (shelf -> picking station)
+        and the index of the list represent the robot number which will execute this tasks
+    """
+    #initialization
+    intial_mutation_rate = 0.1
+    final_mutation_rate = 0.5
     #calculate the distances between different task orders
     print("Calculating C,D and W....")
     start = time.time()  
@@ -221,6 +244,7 @@ def genetic_alg(pop_size, MaxEpoc, crossover_rate, num_robots, num_tasks, elitis
     picking_list = [item[1] for item in W]
     print(f"picking_list:\n{picking_list}")
 
+    # match task number with shelf location and picking station location for each robot's tasks
     robots_tasks= []
     for i in range(num_robots):
         robot_shelfs = []
@@ -233,7 +257,3 @@ def genetic_alg(pop_size, MaxEpoc, crossover_rate, num_robots, num_tasks, elitis
     print(f"robots_tasks (shelf, pick_station):\n{robots_tasks}")
 
     return robots_tasks
-
-
-
-print(make_robots_dict("pose.csv"))
