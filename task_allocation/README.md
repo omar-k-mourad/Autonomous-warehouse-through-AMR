@@ -13,8 +13,7 @@
   
 #### Running Task Server
 
-    cd task_allocation/task_allocation
-    python3 main.py
+    ros2 run task_allocation task_allocation_node.py
 
 #### Set_cover_greedy
 
