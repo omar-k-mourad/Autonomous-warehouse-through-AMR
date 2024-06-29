@@ -120,6 +120,8 @@ def main():
             # --- Get the result ---
             for nav in nav_list:
                 print(nav.getResult())
+                #handle completed tasks
+                tasks_queue.clear()
     except KeyboardInterrupt:
         pass
 

@@ -60,10 +60,14 @@ class Costs:
         """
         Di = self.D[robot_no][task_no - 1]
         return Di
-
-    def get_Cij(self, task_pool, lenght):
-        task_pool = sorted(task_pool)
-        return sum([self.C[task_pool[i] - 1][task_pool[i+1] - (task_pool[i] + 1)] for i in range(lenght - 1)])
+    
+    def get_Cij(self, task_pool,length):
+        task_costs = []
+        for i in range(length - 1):
+            t1 = (task_pool[i] - 1) if (task_pool[i] < task_pool[i + 1]) else (task_pool[i+1] - 1)
+            t2 = task_pool[i+1] - (task_pool[i] + 1) if task_pool[i] < task_pool[i + 1] else task_pool[i] - (task_pool[i + 1] + 1)
+            task_costs.append(self.C[t1][t2])
+        return sum(task_costs)
 
     def get_Wi(self, task_pool):
         return sum([self.W[task - 1][0] for task in task_pool])

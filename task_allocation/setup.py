@@ -21,7 +21,8 @@ setup(
     entry_points={
         'console_scripts': [
             'get_loc = task_allocation.get_loc:main',
-            'task_allocation_node = task_allocation.task_allocation_server:main',
+            'single_task_allocation_node = task_allocation.single_task_allocation_server:main',
+            'multi_task_allocation_node = task_allocation.multi_task_allocation_server:main',
         ],
     },
 )
