@@ -75,7 +75,7 @@ class TaskAllocationNode(Node):
             task_shelves_poses = make_pose_stamps(task_shelves_coordinates, nav)
             robots_num = 1
             pose_csv_path = os.path.join(os.path.dirname(__file__), "pose.csv")
-            robots_dict = make_robots_dict(pose_csv_path)
+            robots_dict = make_robots_dict("pose.csv")
             robots_coordinates = robots_dict.values()
             print(robots_coordinates)
             robots_poses = make_pose_stamps(robots_coordinates, nav)

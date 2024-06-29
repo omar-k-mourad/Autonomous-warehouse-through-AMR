@@ -1,4 +1,4 @@
-from fetching_orderProducts_with_shelfIDs import get_shelves_locations
+from order_processing import get_shelves_locations
 
 def min_shelves_greedy(warehouse, order_items, shelfIDs, dynamodb):
   """
