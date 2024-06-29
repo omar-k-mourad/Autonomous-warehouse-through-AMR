@@ -42,7 +42,7 @@ def make_robots_dict(file_name):
             x = float(x.strip())
             y = float(y.strip())
             robot_coordinte_dict[robot_name] = (x , y) 
-        print("dict", dict)
+        print("dict", robot_coordinte_dict)
         return robot_coordinte_dict
 
 def generate_population(num_robots, num_tasks, num_chromosomes):

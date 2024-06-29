@@ -27,6 +27,8 @@ def get_shelves_to_pick(dynamodb, sqs_client, queue_url):
     print("Transform", warehouse, order_items, shelfIDs)
     shelves_to_pick = min_shelves_greedy(warehouse, order_items, shelfIDs, dynamodb)
     task_shelves_coordinates = [ast.literal_eval(item) for item in shelves_to_pick]
+    
+    task_shelves_coordinates = [(1.7, 0.6), (0.0, 0.6), (-1.0, 0.6)]
     print(task_shelves_coordinates)
     return task_shelves_coordinates
 
@@ -38,7 +40,7 @@ class TaskAllocationNode(Node):
 
     def init_task_allocation(self):
         print("Task allocation server starting.....")
-        nav = BasicNavigator(namespace='robot1')
+        nav = BasicNavigator()
 
         # Initialize the DynamoDB resource
         dynamodb = boto3.resource('dynamodb')
@@ -49,7 +51,7 @@ class TaskAllocationNode(Node):
         # SQS OrderProductsQueue URL
         queue_url = "https://sqs.eu-north-1.amazonaws.com/381491978736/OrderProductsQueue"
 
-        min_tasks = 2
+        min_tasks = 1
         waiting_time = 10
 
         tasks_queue = []
@@ -72,13 +74,15 @@ class TaskAllocationNode(Node):
             tasks_num = len(task_shelves_coordinates)
             task_shelves_poses = make_pose_stamps(task_shelves_coordinates, nav)
             robots_num = 1
-            robots_dict = make_robots_dict("pose.csv")
+            pose_csv_path = os.path.join(os.path.dirname(__file__), "pose.csv")
+            robots_dict = make_robots_dict(pose_csv_path)
             robots_coordinates = robots_dict.values()
+            print(robots_coordinates)
             robots_poses = make_pose_stamps(robots_coordinates, nav)
             picking_stations_coordinates = [(0.0,-2.0), (-1.0,-2.0), (1.0,-2.0)]
             picking_stations_poses = make_pose_stamps(picking_stations_coordinates, nav)
             pop_size = 100
-            MaxEpoc = 10000
+            MaxEpoc = 1000
             crossover_rate = 0.95
             elitist_precentage = 20
             distance_strategy = nav_distance
@@ -100,16 +104,10 @@ class TaskAllocationNode(Node):
                 picking_stations_poses=picking_stations_poses,
                 nav=nav)
             
-            nav_list = []
             robots_waypoints = []
 
-            print("creating nav2 ojects.....")
-            for i, robot in enumerate(robot_tasks):
-                robot_name = 'robot' + str(i + 1)
-                nav_list.append(BasicNavigator(namespace=robot_name))
             print("starting NAV2.....")
-            for nav in nav_list:
-                nav.waitUntilNav2Active()
+            nav.waitUntilNav2Active()
             print("creating waypoints.....")
             for robot in robot_tasks:
                 waypoints = []
@@ -122,23 +120,22 @@ class TaskAllocationNode(Node):
                     waypoints.append(task_shelves_poses[task[0] - 1])
                 robots_waypoints.append(waypoints)
             print("Starting Navigation.....")
-            for i, nav in enumerate(nav_list):
-                nav.followWaypoints(robots_waypoints[i])
+            nav.followWaypoints(robots_waypoints[0])
             
-            while not all(nav.isTaskComplete() for nav in nav_list):
+            while not nav.isTaskComplete():
                 pass
             #         feedback = nav.getFeedback()
             #         # print(feedback)
 
             # --- Get the result ---
-            for nav in nav_list:
-                print(nav.getResult())
-                tasks_queue.clear()
+            nav.getResult()
+            tasks_queue.clear()
    
 
 def main(args=None):
     rclpy.init(args=args)
     node = TaskAllocationNode()
+    rclpy.spin(node)
     node.destroy_node()
     rclpy.shutdown()
 
