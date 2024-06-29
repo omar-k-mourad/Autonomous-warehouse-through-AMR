@@ -7,7 +7,7 @@ sys.path.append(os.path.dirname(__file__))
 
 from .nav2_commander import *
 from .genetic_algorithm import *
-from .fetching_orderProducts_with_shelfIDs import *
+from .order_processing import *
 from .set_cover_greedy import *
 from .clean_data import *
 import ast
@@ -19,7 +19,7 @@ from rclpy.executors import SingleThreadedExecutor
 
 def get_shelves_to_pick(dynamodb, sqs_client, queue_url):
     #getting orders from database and adding it to queue
-    order_products = fetching_order_products_with_shelf_IDs(dynamodb, sqs_client, queue_url)
+    order_products = fetch_order_products_with_shelf_ids(dynamodb, sqs_client, queue_url)
     print("order products:", order_products)
     reduced_order_products_shelves = extract_product_and_shelf(order_products)
     print("reduced", reduced_order_products_shelves)
