@@ -1,25 +1,18 @@
 from nav2_commander import *
 from genetic_algorithm import *
-from order_processing import *
 from set_cover_greedy import *
 from clean_data import *
+from warehouseDBFunctions import *
 import ast
 import time
 import boto3
 
 def get_shelves_to_pick(dynamodb, sqs_client, queue_url):
-    #getting orders from database and adding it to queue
-    order_products = fetch_order_products_with_shelf_ids(dynamodb, sqs_client, queue_url)
-    print("order products:", order_products)
-    reduced_order_products_shelves = extract_product_and_shelf(order_products)
-    print("reduced", reduced_order_products_shelves)
-    order_items, shelfIDs, warehouse = Transform_response(reduced_order_products_shelves)
-    print("Transform", warehouse, order_items, shelfIDs)
-    shelves_to_pick = min_shelves_greedy(warehouse, order_items, shelfIDs, dynamodb)
+    warehouse, ordered_products, shelves_locations = get_warehouse(dynamodb), get_ordered_products(sqs_client, queue_url), get_shelves_locations(dynamodb)
+    ordered_products = unique_ordered_products(ordered_products)
+    shelves_to_pick = min_shelves_greedy(warehouse, ordered_products, shelves_locations)
     task_shelves_coordinates = [ast.literal_eval(item) for item in shelves_to_pick]
-    print(task_shelves_coordinates)
     return task_shelves_coordinates
-
 
 def main():
     print("Task allocation server starting.....")
@@ -34,6 +27,8 @@ def main():
 
     # SQS OrderProductsQueue URL
     queue_url = "https://sqs.eu-north-1.amazonaws.com/381491978736/OrderProductsQueue"
+    tasks = get_shelves_to_pick(dynamodb, sqs_client, queue_url)
+    print("Tasks: ", tasks)
 
     min_tasks = 2
     waiting_time = 10
@@ -124,6 +119,7 @@ def main():
                 tasks_queue.clear()
     except KeyboardInterrupt:
         pass
+
 
 if __name__ == '__main__':
     main()
