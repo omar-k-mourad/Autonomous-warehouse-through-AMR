@@ -33,7 +33,7 @@ def main():
     min_tasks = 2
     waiting_time = 10
 
-    tasks_queue = []
+    tasks_queue = [(1.0, -0.6), (1.0, 0.6), (2.0, -0.6), (2.0, 0.6)]
     try:
         while True:
             print("starting new iteration.....")
@@ -46,7 +46,7 @@ def main():
                 print("waiting for tasks....")
                 time.sleep(waiting_time)
                 tasks = get_shelves_to_pick(dynamodb, sqs_client, queue_url)
-                tasks_queue.append(tasks)
+                tasks_queue.extend(tasks)
 
 
             # setting input parameters for Genetic algorithm
