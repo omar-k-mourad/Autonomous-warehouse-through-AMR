@@ -63,5 +63,6 @@ def generate_launch_description():
         gazebo,
         controller,
         rviz2_node,
+        moveit
         
     ])
