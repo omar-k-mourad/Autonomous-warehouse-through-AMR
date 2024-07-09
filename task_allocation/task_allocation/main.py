@@ -1,5 +1,5 @@
 from nav2_commander import *
-from test1 import *
+from genetic_algorithm import *
 from set_cover_greedy import *
 from clean_data import *
 from warehouseDBFunctions import *
