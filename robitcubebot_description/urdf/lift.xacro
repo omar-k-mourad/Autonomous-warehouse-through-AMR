@@ -33,7 +33,7 @@
 
   </link>
   <joint name="platform_joint" type="fixed">
-    <parent link="upper_link" />
+    <parent link="base_link" />
     <child link="link_platform_mid" />
     <origin xyz="0.0 0 0.02" rpy="0. 0. 0."/>
   </joint>

@@ -14,7 +14,7 @@ class CmdVelRepublisher(Node):
             10)
         self.publisher = self.create_publisher(
             TwistStamped,
-            '/bumperbot_controller/cmd_vel',
+            '/robitcubebot_controller/cmd_vel',
             10)
         self.get_logger().info('CmdVelRepublisher node is running.')
 

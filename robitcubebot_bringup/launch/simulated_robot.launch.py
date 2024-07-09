@@ -20,19 +20,14 @@ from launch.substitutions import Command
 def generate_launch_description():
 
 
-    world_file_name = 'my_world.world'
-    world = os.path.join(
-        get_package_share_directory('robitcubebot_bringup'),
-        'worlds',
-        world_file_name
-    )
+
     gazebo = IncludeLaunchDescription(
         os.path.join(
             get_package_share_directory("robitcubebot_description"),
             "launch",
             "gazebo.launch.py"
         ),
-        launch_arguments={'world': world}.items()
+
     )
     rviz_config_path = os.path.join(get_package_share_directory('robitcubebot_description'),
                                     'rviz', 'my_robot_config.rviz')
@@ -68,5 +63,5 @@ def generate_launch_description():
         gazebo,
         controller,
         rviz2_node,
-        moveit,
+        
     ])

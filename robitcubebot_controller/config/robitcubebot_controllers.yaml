@@ -20,8 +20,9 @@ controller_manager:
       base_frame_id: base_footprint
       odom_frame_id: odom
       robot_base_frame_id: base_footprint
-      left_wheel_names  : ['front_wheel_left_joint','back_wheel_left_joint']
-      right_wheel_names : ['front_wheel_right_joint','back_wheel_right_joint']
+      left_wheel_names  : ['wheel_left_joint']
+      right_wheel_names : ['wheel_right_joint']
+      
     lifter_controller:
       type: velocity_controllers/JointGroupVelocityController
       joints:  # Changed 'joint' to 'joints' to match expected parameter
@@ -36,8 +37,8 @@ robitcubebot_controller:
   ros__parameters:
     type        : diff_drive_controller/DiffDriveController
     use_stamped_vel: true
-    left_wheel_names  : ['front_wheel_left_joint','back_wheel_left_joint']
-    right_wheel_names : ['front_wheel_right_joint','back_wheel_right_joint']
+    left_wheel_names  : ['wheel_left_joint']
+    right_wheel_names : ['wheel_right_joint']
 
     publish_rate: 50.0               # default: 50
     pose_covariance_diagonal : [0.001, 0.001, 1.0e-3, 1.0e-3, 1.0e-3, 0.01]
@@ -103,10 +104,9 @@ gripper_controller:
 simple_velocity_controller:
   ros__parameters:
     joints:
-      - front_wheel_left_joint
-      - front_wheel_right_joint
-      - back_wheel_left_joint
-      - back_wheel_right_joint
+      - wheel_left_joint
+      - wheel_right_joint
+
 odom_publisher:
   ros__parameters:
     type: diff_drive_controller/OdometryPublisher
@@ -114,16 +114,13 @@ odom_publisher:
     base_frame_id: base_footprint
     odom_frame_id: odom
     robot_base_frame_id: base_footprint
-    left_wheel_names  : ['front_wheel_left_joint','back_wheel_left_joint']
-    right_wheel_names : ['front_wheel_right_joint','back_wheel_right_joint']
-
+    left_wheel_names  : ['wheel_left_joint']
+    right_wheel_names : ['wheel_right_joint']
 joint_state_broadcaster:
   ros__parameters:
     joints:
-      - front_wheel_left_joint
-      - front_wheel_right_joint
-      - back_wheel_left_joint
-      - back_wheel_right_joint
+      - wheel_left_joint
+      - wheel_right_joint
       - lift_joint
 
 
