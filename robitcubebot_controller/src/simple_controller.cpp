@@ -15,7 +15,7 @@ SimpleController::SimpleController(const std::string& name)
                                   , theta_(0.0)
 {
     declare_parameter("wheel_radius", 0.033);
-    declare_parameter("wheel_separation", 0.2);
+    declare_parameter("wheel_separation", 0.24 );
     wheel_radius_ = get_parameter("wheel_radius").as_double();
     wheel_separation_ = get_parameter("wheel_separation").as_double();
     RCLCPP_INFO_STREAM(get_logger(), "Using wheel radius " << wheel_radius_);
@@ -56,7 +56,6 @@ void SimpleController::velCallback(const geometry_msgs::msg::TwistStamped &msg)
     
     wheel_cmd_pub_->publish(wheel_speed_msg);
 }
-
 
 void SimpleController::jointCallback(const sensor_msgs::msg::JointState &state)
 {
@@ -106,14 +105,17 @@ void SimpleController::jointCallback(const sensor_msgs::msg::JointState &state)
     // TF
     transform_stamped_.transform.translation.x = x_;
     transform_stamped_.transform.translation.y = y_;
-    transform_stamped_.transform.rotation.x = q.getX();
-    transform_stamped_.transform.rotation.y = q.getY();
-    transform_stamped_.transform.rotation.z = q.getZ();
-    transform_stamped_.transform.rotation.w = q.getW();
+    // Apply 180-degree rotation around the z-axis
+    tf2::Quaternion q_180;
+    q_180.setRPY(0, 0, M_PI); // 180 degrees in radians
+    tf2::Quaternion q_combined = q * q_180;
+    transform_stamped_.transform.rotation.x = q_combined.getX();
+    transform_stamped_.transform.rotation.y = q_combined.getY();
+    transform_stamped_.transform.rotation.z = q_combined.getZ();
+    transform_stamped_.transform.rotation.w = q_combined.getW();
     transform_stamped_.header.stamp = get_clock()->now();
     transform_broadcaster_->sendTransform(transform_stamped_);
 }
-
 
 int main(int argc, char* argv[])
 {

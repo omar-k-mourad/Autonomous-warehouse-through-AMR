@@ -52,7 +52,6 @@ def generate_launch_description():
                         arguments=["-entity", "robitcubebot",
                                    "-topic", "robot_description",
                                   ],
-           
                         output="screen"
     )
 

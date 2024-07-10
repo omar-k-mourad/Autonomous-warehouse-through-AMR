@@ -38,8 +38,6 @@ NoisyController::NoisyController(const std::string& name)
 
     prev_time_ = get_clock()->now();
 }
-
-
 void NoisyController::jointCallback(const sensor_msgs::msg::JointState &state)
 {
     // Implements the inverse differential kinematic model
@@ -98,14 +96,17 @@ void NoisyController::jointCallback(const sensor_msgs::msg::JointState &state)
     // TF
     transform_stamped_.transform.translation.x = x_;
     transform_stamped_.transform.translation.y = y_;
-    transform_stamped_.transform.rotation.x = q.getX();
-    transform_stamped_.transform.rotation.y = q.getY();
-    transform_stamped_.transform.rotation.z = q.getZ();
-    transform_stamped_.transform.rotation.w = q.getW();
+    // Apply 180-degree rotation around the z-axis
+    tf2::Quaternion q_180;
+    q_180.setRPY(0, 0, M_PI); // 180 degrees in radians
+    tf2::Quaternion q_combined = q * q_180;
+    transform_stamped_.transform.rotation.x = q_combined.getX();
+    transform_stamped_.transform.rotation.y = q_combined.getY();
+    transform_stamped_.transform.rotation.z = q_combined.getZ();
+    transform_stamped_.transform.rotation.w = q_combined.getW();
     transform_stamped_.header.stamp = get_clock()->now();
     transform_broadcaster_->sendTransform(transform_stamped_);
 }
-
 
 int main(int argc, char* argv[])
 {

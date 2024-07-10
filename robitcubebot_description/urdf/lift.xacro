@@ -6,17 +6,23 @@
   <xacro:property name="plate_radius" value="0.045" />
   <xacro:property name="screw_length" value="0.10" />
   <link name="link_platform_mid">
-    
+    <origin xyz="0 0 0.0" rpy="0 0 0"/>
 
     <visual>
-      <origin xyz="0 0 0.045" rpy="0 0 0"/>
       <geometry>
         <mesh filename="package://robitcubebot_description/meshes/Lead_screw.STL" scale="0.001 0.001 0.001" />
       </geometry>
       <material name="black">
           <color rgba="0.1 0.1 0.1 1" />
       </material>
-      </visual>
+
+    </visual>
+    <collision>
+      <geometry>
+        <box size="0.02 0.02 0.10" />
+      </geometry>
+    </collision>
+
     <inertial>
       <mass value="1"/>
       <inertia
@@ -27,7 +33,7 @@
 
   </link>
   <joint name="platform_joint" type="fixed">
-    <parent link="base_link" />
+    <parent link="upper_link" />
     <child link="link_platform_mid" />
     <origin xyz="0.0 0 0.02" rpy="0. 0. 0."/>
   </joint>
@@ -59,15 +65,14 @@
     </inertial>
   </link>
   
-  <joint name="lift_joint" type="prismatic" >
-    <origin xyz="0 0 0.1" rpy="0 0 0"/>
-    <child link="lift_link" />
+  <joint name="lift_joint" type="prismatic">
+    <origin xyz="0 0 0.03" rpy="0 0 0"/>
     <parent link="link_platform_mid" />
+    <child link="lift_link" />
     <axis xyz="0 0 1" rpy="0 0 0"/>
-    <limit effort="10000.0" lower="-0.05" upper="-0.035" velocity="0.2"/>
+    <limit effort="100.0" lower="-0.05" upper="0.035" velocity="1.0"/>
     <dynamics damping="0.1" friction="0.1"/>
     <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
-
   </joint>
 
 </robot>
