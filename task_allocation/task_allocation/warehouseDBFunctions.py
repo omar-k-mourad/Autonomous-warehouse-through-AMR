@@ -53,6 +53,24 @@ def GetAllSlots():
     )
     return Slots
 
+def getSlotsLocations(stationType):
+    # Query to get all slots of the specified type (picking or replenishment)
+    response = client.query(
+        TableName='Warehouse',
+        IndexName='Type-index',  # Ensure this secondary index exists on 'Type' attribute
+        KeyConditionExpression='#type = :type',
+        ExpressionAttributeNames={
+            '#type': 'Type'
+        },
+        ExpressionAttributeValues={
+            ':type': {'S': stationType}
+        }
+    )
+
+    # Extract locations from the response and convert them to tuples
+    locations = [tuple(map(int, item['Loc']['S'].strip('()').split(','))) for item in response.get('Items', [])]
+    return locations
+
 def getItem(PK_value, SK_value):
     # Define the composite primary key of the item
     composite_key = {
@@ -213,3 +231,4 @@ def get_ordered_products(sqs_client, queue_url):
             )
     
     return ordered_products
+print(getSlotsLocations('picking'))

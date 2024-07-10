@@ -54,8 +54,7 @@ def main():
         while True:
             print("starting new iteration.....")
 
-            tasks = get_shelves_to_pick(dynamodb, sqs_client, queue_url)
-            tasks = [(1.0, -0.6), (1.0, 0.6), (2.0, -0.6), (2.0, 0.6), (0.0, 0.6), (0.0, -0.6), (0.6, 0.0), (0.6, 1.0), (0.6, -1.0)]
+            tasks = [(1.0, -0.6), (1.0, 0.6), (2.0, -0.6), (2.0, 0.6), (0.0, 0.6), (0.0, -0.6), (0.6, 0.0), (0.6, 1.0), (0.6, -1.0)] #tasks = get_shelves_to_pick(dynamodb, sqs_client, queue_url)
             tasks_queue.extend(tasks)
             
             #wait until collecting min task
@@ -73,7 +72,7 @@ def main():
             robots_dict = make_robots_dict("pose.csv")
             robots_coordinates = robots_dict.values()
             robots_poses = make_pose_stamps(robots_coordinates, nav)
-            picking_stations_coordinates = [(0.0,-2.0), (-1.0,-2.0), (1.0,-2.0)]
+            picking_stations_coordinates = [(0.0,-2.0), (-1.0,-2.0), (1.0,-2.0)] #picking_stations_coordinates = getSlotsLocations('picking')
             picking_stations_poses = make_pose_stamps(picking_stations_coordinates, nav)
             pop_size = 100
             max_epochs = 100000
