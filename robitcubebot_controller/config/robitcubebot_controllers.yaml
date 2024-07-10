@@ -16,12 +16,12 @@ controller_manager:
 
     odom_publisher:
       type: diff_drive_controller/OdometryPublisher
-      publish_rate: 50
+      publish_rate: 30
       base_frame_id: base_footprint
       odom_frame_id: odom
       robot_base_frame_id: base_footprint
-      left_wheel_names  : ['back_wheel_right_joint']
-      right_wheel_names : ['back_wheel_left_joint']
+      left_wheel_names  : ['front_wheel_right_joint']
+      right_wheel_names : ['front_wheel_left_joint']
 
 
     lifter_controller:
@@ -41,7 +41,7 @@ robitcubebot_controller:
     left_wheel_names  : ['front_wheel_right_joint','back_wheel_right_joint']
     right_wheel_names : ['front_wheel_left_joint','back_wheel_left_joint']
 
-    publish_rate: 30.0               # default: 50
+    publish_rate: 30.0               # default: 30
     pose_covariance_diagonal : [0.001, 0.001, 1.0e-3, 1.0e-3, 1.0e-3, 0.01]
     twist_covariance_diagonal: [0.001, 0.001, 1.0e-3, 1.0e-3, 1.0e-3, 0.01]
 
@@ -116,15 +116,12 @@ odom_publisher:
     base_frame_id: base_footprint
     odom_frame_id: odom
     robot_base_frame_id: base_footprint
-    left_wheel_names  : ['back_wheel_right_joint']
-    right_wheel_names : ['back_wheel_left_joint']
+    left_wheel_names  : ['front_wheel_right_joint']
+    right_wheel_names : ['front_wheel_left_joint']
 
 joint_state_broadcaster:
   ros__parameters:
     joints:
-      - back_wheel_right_joint
-      - back_wheel_left_joint
+      - front_wheel_right_joint
+      - front_wheel_left_joint
       - lift_joint
-
-
-
