@@ -33,12 +33,13 @@ def main():
     min_tasks = 2
     waiting_time = 10
 
-    tasks_queue = [(1.0, -0.6), (1.0, 0.6), (2.0, -0.6), (2.0, 0.6)]
+    tasks_queue = []
     try:
         while True:
             print("starting new iteration.....")
 
             tasks = get_shelves_to_pick(dynamodb, sqs_client, queue_url)
+            tasks = [(1.0, -0.6), (1.0, 0.6), (2.0, -0.6), (2.0, 0.6), (0.0, 0.6), (0.0, -0.6), (0.6, 0.0), (0.6, 1.0), (0.6, -1.0)]
             tasks_queue.extend(tasks)
             
             #wait until collecting min task
@@ -53,31 +54,31 @@ def main():
             task_shelves_coordinates = tasks_queue
             tasks_num = len(task_shelves_coordinates)
             task_shelves_poses = make_pose_stamps(task_shelves_coordinates, nav)
-            robots_num = 1
+            robots_num = 2
             robots_dict = make_robots_dict("pose.csv")
             robots_coordinates = robots_dict.values()
             robots_poses = make_pose_stamps(robots_coordinates, nav)
             picking_stations_coordinates = [(0.0,-2.0), (-1.0,-2.0), (1.0,-2.0)]
             picking_stations_poses = make_pose_stamps(picking_stations_coordinates, nav)
             pop_size = 100
-            MaxEpoc = 10000
+            max_epochs = 10000
             crossover_rate = 0.95
-            elitist_precentage = 20
+            elitist_percentage = 20
             distance_strategy = nav_distance
             nav = nav
 
             robot_tasks = genetic_alg(
                 pop_size=pop_size,
-                MaxEpoc=MaxEpoc,
+                max_epochs=max_epochs,
                 crossover_rate=crossover_rate,
                 num_robots=robots_num, 
                 num_tasks=tasks_num, 
-                elitist_precentage=elitist_precentage,
+                elitist_percentage=elitist_percentage,
                 robots_coordinates=robots_coordinates, 
                 robots_poses=robots_poses, 
                 task_shelves_coordinates=task_shelves_coordinates, 
                 task_shelves_poses=task_shelves_poses, 
-                distance_strag=distance_strategy,
+                distance_strategy=distance_strategy,
                 picking_stations_coordinates = picking_stations_coordinates,
                 picking_stations_poses=picking_stations_poses,
                 nav=nav)
