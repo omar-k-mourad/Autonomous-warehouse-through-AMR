@@ -25,6 +25,8 @@ def set_initial_pose():
     # --- Set initial pose ---
     initial_pose = create_pose_stamped(nav, 0.0, 0.0, 0.0)
     nav.setInitialPose(initial_pose)
+
+
     
 def main():
     # --- Init ROS2 communications and Simple Commander API ---
@@ -40,14 +42,12 @@ def main():
     # --- Wait for Nav2 ---
     nav1.waitUntilNav2Active()
     nav2.waitUntilNav2Active()
-
-    
-    start = create_pose_stamped(nav1, 0.0, 0.0, 0.0)
-    goal = create_pose_stamped(nav1, 3.4, 0.4, 0.0)
+       
+    #start = create_pose_stamped(nav1, 0.0, 0.0, 0.0)
+    #goal = create_pose_stamped(nav1, 3.4, 0.4, 0.0)
 
     #ans = nav.getPath(start=start, goal=goal, planner_id='GridBased',use_start=True)
     #print(len(ans.poses))
-    
     
     waypoints1 = []
     shelf_poses1 =   [(1.0, -0.5), (0.5, -0.5), (0.0, -0.5)]
@@ -75,7 +75,6 @@ def main():
     # --- Get the result ---
     print(nav1.getResult())
     print(nav2.getResult())
-  
 
     # --- Shutdown ROS2 communications ---
     rclpy.shutdown()

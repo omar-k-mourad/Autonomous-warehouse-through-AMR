@@ -3,6 +3,7 @@ from genetic_algorithm import *
 from set_cover_greedy import *
 from clean_data import *
 from warehouseDBFunctions import *
+from param_config import *
 import ast
 import time
 import boto3
@@ -17,7 +18,6 @@ def get_shelves_to_pick(dynamodb, sqs_client, queue_url):
 def main():
     print("Task allocation server starting.....")
     rclpy.init()
-    nav = BasicNavigator(namespace='robot1')
 
     # Initialize the DynamoDB resource
     dynamodb = boto3.resource('dynamodb')
@@ -30,7 +30,23 @@ def main():
     tasks = get_shelves_to_pick(dynamodb, sqs_client, queue_url)
     print("Tasks: ", tasks)
 
-    min_tasks = 2
+    # Controller for the costmap layer to be able to compute paths with a clear costmap
+    local_robot_layer_controller = RobotLayerController('/robot1/local_costmap/local_costmap/set_parameters')
+    global_robot_layer_controller = RobotLayerController('/robot1/global_costmap/global_costmap/set_parameters')
+
+    # set the number of robots and create nav2 object for each robot
+    robots_num = 2
+    nav_list = []
+    print("creating nav2 ojects.....")
+    for i in range(robots_num):
+        robot_name = 'robot' + str(i + 1)
+        nav_list.append(BasicNavigator(namespace=robot_name))
+
+    print("starting NAV2.....")
+    for nav in nav_list:
+        nav.waitUntilNav2Active()
+
+    min_tasks = robots_num
     waiting_time = 10
 
     tasks_queue = []
@@ -54,18 +70,22 @@ def main():
             task_shelves_coordinates = tasks_queue
             tasks_num = len(task_shelves_coordinates)
             task_shelves_poses = make_pose_stamps(task_shelves_coordinates, nav)
-            robots_num = 2
             robots_dict = make_robots_dict("pose.csv")
             robots_coordinates = robots_dict.values()
             robots_poses = make_pose_stamps(robots_coordinates, nav)
             picking_stations_coordinates = [(0.0,-2.0), (-1.0,-2.0), (1.0,-2.0)]
             picking_stations_poses = make_pose_stamps(picking_stations_coordinates, nav)
             pop_size = 100
-            max_epochs = 10000
+            max_epochs = 100000
             crossover_rate = 0.95
             elitist_percentage = 20
             distance_strategy = nav_distance
-            nav = nav
+            nav = nav_list[0]
+
+            #disable robots layer before computing costs
+            costmap_controller(local_robot_layer_controller, global_robot_layer_controller, False)
+            
+            nav_list[0].clearAllCostmaps()
 
             robot_tasks = genetic_alg(
                 pop_size=pop_size,
@@ -83,16 +103,12 @@ def main():
                 picking_stations_poses=picking_stations_poses,
                 nav=nav)
             
-            nav_list = []
+            #enable robots layer before navigation
+            costmap_controller(local_robot_layer_controller, global_robot_layer_controller, True)
+            
+            #creating waypoints
             robots_waypoints = []
 
-            print("creating nav2 ojects.....")
-            for i, robot in enumerate(robot_tasks):
-                robot_name = 'robot' + str(i + 1)
-                nav_list.append(BasicNavigator(namespace=robot_name))
-            print("starting NAV2.....")
-            for nav in nav_list:
-                nav.waitUntilNav2Active()
             print("creating waypoints.....")
             for robot in robot_tasks:
                 waypoints = []
