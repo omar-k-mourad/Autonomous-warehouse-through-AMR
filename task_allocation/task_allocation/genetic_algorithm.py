@@ -91,6 +91,16 @@ def order_crossover(parents, crossover_rate):
 
     Returns:
         tuple: Two offspring chromosomes.
+    
+    crossover example :
+        parent 1 : (9 3 4 8 10 2 1 6 5 7)
+        parent 2 : (2 5 7 10 9 1 8 4 6 3)
+
+        cross parent 1 : (9 3 4 | ->8 10 2 1<- | 6 5 7) 
+        cross parent 2 : (2 5 7 | ->10 9 1 8<- | 4 6 3)
+
+        offspring 1 : (8 10 2 1 5 7 9 4 6 3)
+        offspring 2 : (10 9 1 8 3 4 2 6 5 7)
     """
     if random.random() < crossover_rate:
         cross = len(parents[0]) // 3
@@ -109,6 +119,10 @@ def swap_mutation(chromosome, mutation_rate):
 
     Returns:
         list: Mutated chromosome.
+    
+    mutation example :
+        inptut chromosome : (9 3 4 8 10 2 1 6 5 7)
+        output chromosome : (7 3 4 8 10 2 1 6 5 9)
     """
     if len(chromosome) < 2:
         return chromosome
@@ -142,9 +156,11 @@ def genetic_alg(pop_size, max_epochs, crossover_rate, num_robots, num_tasks, eli
     Returns:
         list: List of tasks for each robot.
     """
+    # Set the intital and final mutation rate
     initial_mutation_rate = 0.1
     final_mutation_rate = 0.5
 
+    #Calculate the distances between different task orders;
     print("Calculating C, D and W....")
     start = time.time()
     costs = Costs(num_robots, num_tasks)
@@ -153,19 +169,24 @@ def genetic_alg(pop_size, max_epochs, crossover_rate, num_robots, num_tasks, eli
     end = time.time()
     print("C, D and W creation time:", end - start, "s")
 
+    # Generate an population of feasible solutions randomly
     population = generate_population(num_robots, num_tasks, pop_size)
-    print("First Pop:", population)
 
     start = time.time()
     for epoch in range(max_epochs):
         weights = [costs.fitness(chromosome) for chromosome in population]
+        
+        # Set the alterable mutation rate Pm according to the actual evolution generations
         mutation_rate = initial_mutation_rate if epoch < 1000 else final_mutation_rate
 
+        # Select individuals according to elitist strategy and roulette wheel method
         elitist_population = selection_elitist(population, weights, elitist_percentage)
         next_generation = elitist_population[:]
         while len(next_generation) < pop_size:
             parents = selection_roulette(population, weights, 2)
+            # Crossover individuals in pairs by a variation of the order crossover operator depending on crossover rate
             offspring_a, offspring_b = order_crossover(parents, crossover_rate)
+            # Mutate an individual by swap mutation according to mutation rate
             next_generation.append(swap_mutation(offspring_a, mutation_rate))
             next_generation.append(swap_mutation(offspring_b, mutation_rate))
 
