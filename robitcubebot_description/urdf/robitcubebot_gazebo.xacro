@@ -2,37 +2,7 @@
 
 <robot name="robitcubebot" xmlns:xacro="http://ros.org/wiki/xacro">
 
-  <!-- Move this one to ros2 control -->
-  <transmission name="front_right_wheel_transmission">
-    <plugin>transmission_interface/SimpleTransmission</plugin>
-    <actuator name="front_wheel_right_motor" role="front_actuator_right"/>
-    <joint name="front_wheel_right_joint"    role="front_joint_right">
-      <mechanical_reduction>1.0</mechanical_reduction>
-    </joint>
-  </transmission>
 
-  <transmission name="front_left_wheel_transmission">
-    <plugin>transmission_interface/SimpleTransmission</plugin>
-    <actuator name="front_wheel_left_motor" role="front_actuator_left"/>
-    <joint name="front_wheel_left_joint"    role="front_joint_left">
-      <mechanical_reduction>1.0</mechanical_reduction>
-    </joint>
-  </transmission>
-  <transmission name="back_right_wheel_transmission">
-    <plugin>transmission_interface/SimpleTransmission</plugin>
-    <actuator name="back_wheel_right_motor" role="back_actuator_right"/>
-    <joint name="back_wheel_right_joint"    role="back_joint_right">
-      <mechanical_reduction>1.0</mechanical_reduction>
-    </joint>
-  </transmission>
-
-  <transmission name="back_left_wheel_transmission">
-    <plugin>transmission_interface/SimpleTransmission</plugin>
-    <actuator name="back_wheel_left_motor" role="back_actuator_left"/>
-    <joint name="back_wheel_left_joint"    role="back_joint_left">
-      <mechanical_reduction>1.0</mechanical_reduction>
-    </joint>
-  </transmission>
   <!-- Wheels -->
   <gazebo reference="front_wheel_left_link">
     <mu1>1000000000000000.0</mu1>
@@ -41,7 +11,6 @@
     <kd>10.0</kd>
     <minDepth>0.001</minDepth>
     <maxVel>0.1</maxVel>
-    <fdir1>1 0 0</fdir1>
   </gazebo>
 
   <gazebo reference="front_wheel_right_link">
@@ -51,38 +20,73 @@
     <kd>10.0</kd>
     <minDepth>0.001</minDepth>
     <maxVel>0.1</maxVel>
-    <fdir1>1 0 0</fdir1>
   </gazebo>
   
   <gazebo reference="back_wheel_left_link">
-    <mu1>0.1</mu1>
-    <mu2>0.1</mu2>
-    <kp>1000000.0</kp>
-    <kd>100.0</kd>
+    <mu1>1000000000000000.0</mu1>
+    <mu2>1000000000000000.0</mu2>
+    <kp>1000000000000.0</kp>
+    <kd>10.0</kd>
     <minDepth>0.001</minDepth>
-    <maxVel>1.0</maxVel>
+    <maxVel>0.1</maxVel>
   </gazebo>
 
   <gazebo reference="back_wheel_right_link">
-    <mu1>0.1</mu1>
-    <mu2>0.1</mu2>
-    <kp>1000000.0</kp>
-    <kd>100.0</kd>
+    <mu1>1000000000000000.0</mu1>
+    <mu2>1000000000000000.0</mu2>
+    <kp>1000000000000.0</kp>
+    <kd>10.0</kd>
     <minDepth>0.001</minDepth>
-    <maxVel>1.0</maxVel>
+    <maxVel>0.1</maxVel>
   </gazebo>
 
 
 
   <!-- ROS 2 Control -->
-  <gazebo>
+  <!--gazebo>
     <plugin filename="libgazebo_ros2_control.so" name="gazebo_ros2_control">
       <robot_param>robot_description</robot_param>
       <robot_param_node>robot_state_publisher</robot_param_node>
       <parameters>$(find robitcubebot_controller)/config/robitcubebot_controllers.yaml</parameters>
     </plugin>
-  </gazebo>
+  </gazebo-->
 
+<gazebo>
+    <plugin name="wheel_drive_controller" filename="libgazebo_ros_diff_drive.so">
+        <!-- wheels -->
+        <num_wheel_pairs>2</num_wheel_pairs>
+        <left_joint>front_wheel_right_joint</left_joint>
+        <left_joint>back_wheel_right_joint</left_joint>
+        <right_joint>front_wheel_left_joint</right_joint>
+        <right_joint>back_wheel_left_joint</right_joint>
+
+        <!-- kinematics -->
+        <wheel_separation>0.4</wheel_separation>
+        <wheel_diameter>0.065</wheel_diameter>
+
+
+
+        <!-- Limits -->
+        <max_wheel_torque>200.0</max_wheel_torque>
+        <max_wheel_acceleration>10.0</max_wheel_acceleration>
+
+        <!-- Output -->
+        <odometry_frame>odom</odometry_frame>
+        <robot_base_frame>base_footprint</robot_base_frame>
+
+        <!-- topic & re remappings -->
+        <!-- ros>
+            <namespace>/</namespace>
+            <argument>/cmd_vel:=cmd_vel</argument>
+            <argument>/odom:=odom</argument>
+        </ros -->
+
+        <publish_odom>true</publish_odom>
+        <publish_odom_tf>true</publish_odom_tf>
+        <publish_wheel_tf>true</publish_wheel_tf>
+        <update_rate>30.0</update_rate>
+    </plugin>
+  </gazebo>
 
   <!-- IMU -->
   <gazebo reference="imu_link">

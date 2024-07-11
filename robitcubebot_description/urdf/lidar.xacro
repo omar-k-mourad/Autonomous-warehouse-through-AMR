@@ -9,6 +9,7 @@
 
     <link name="laser_frame">
         <visual>
+            <origin xyz="0 0 0" rpy="0 0 0"/>
             <geometry>
                 <cylinder radius="0.034" length="0.03"/>
             </geometry>
@@ -21,6 +22,7 @@
         <xacro:cylinder_inertia m="1.0" r="${2*0.05}" h="${2*0.04}" 
                                     xyz="0 0 0" rpy="${pi / 2.0} 0 0" />
     </link>
+    
     <gazebo reference="laser_frame">
         <material>Gazebo/Red</material>
 

@@ -1,26 +1,10 @@
-# Copyright (c) 2018 Intel Corporation
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
-"""This is all-in-one launch script intended for use by nav2 developers."""
-
 import os
 import xacro
 
-from ament_index_python.packages import get_package_share_directory
+from ament_index_python.packages import get_package_share_directory, get_package_prefix
 
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument, ExecuteProcess, IncludeLaunchDescription
+from launch.actions import DeclareLaunchArgument, ExecuteProcess, IncludeLaunchDescription, SetEnvironmentVariable
 from launch.conditions import IfCondition
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration, PythonExpression
@@ -31,6 +15,8 @@ def generate_launch_description():
     # Get the launch directory
     bringup_dir = get_package_share_directory('nav2_bringup')
     my_dir = get_package_share_directory('my_bot')
+    robit_dir = get_package_share_directory('robitcubebot_description')
+    robit_prefix = get_package_prefix('robitcubebot_description')
     launch_dir = os.path.join(bringup_dir, 'launch')
     my_launch_dir = os.path.join(my_dir, 'launch')
 
@@ -62,11 +48,6 @@ def generate_launch_description():
     robot_sdf = LaunchConfiguration('robot_sdf')
 
     # Map fully qualified names to relative ones so the node's namespace can be prepended.
-    # In case of the transforms (tf), currently, there doesn't seem to be a better alternative
-    # https://github.com/ros/geometry2/issues/32
-    # https://github.com/ros/robot_state_publisher/pull/30
-    # TODO(orduno) Substitute with `PushNodeRemapping`
-    #              https://github.com/ros2/launch_ros/issues/56
     remappings = [('/tf', 'tf'),
                   ('/tf_static', 'tf_static')]
 
@@ -141,28 +122,29 @@ def generate_launch_description():
 
     declare_world_cmd = DeclareLaunchArgument(
         'world',
-        # TODO(orduno) Switch back once ROS argument passing has been fixed upstream
-        #              https://github.com/ROBOTIS-GIT/turtlebot3_simulations/issues/91
-        # default_value=os.path.join(get_package_share_directory('turtlebot3_gazebo'),
-        # worlds/turtlebot3_worlds/waffle.model')
         default_value=os.path.join(bringup_dir, 'worlds', 'world_only.model'),
         description='Full path to world model file to load')
 
     declare_robot_name_cmd = DeclareLaunchArgument(
         'robot_name',
-        default_value='turtlebot3_waffle',
-        description='name of the robot')
+        default_value='robitcubebot',
+        description='Name of the robot')
 
     declare_robot_sdf_cmd = DeclareLaunchArgument(
         'robot_sdf',
         default_value=os.path.join(bringup_dir, 'worlds', 'waffle.model'),
         description='Full path to robot sdf file to spawn the robot in gazebo')
 
+    # Setting the GAZEBO_MODEL_PATH environment variable
+    model_path = os.path.join(robit_dir, 'models')
+    model_path += os.pathsep + os.path.join(robit_prefix, 'share')
+    set_gazebo_model_path_cmd = SetEnvironmentVariable('GAZEBO_MODEL_PATH', model_path)
+
     # Specify the actions
     start_gazebo_server_cmd = ExecuteProcess(
         condition=IfCondition(use_simulator),
         cmd=['gzserver', '-s', 'libgazebo_ros_init.so',
-             '-s', 'libgazebo_ros_factory.so', world],
+             '-s', 'libgazebo_ros_factory.so', LaunchConfiguration('world')],
         cwd=[launch_dir], output='screen')
 
     start_gazebo_client_cmd = ExecuteProcess(
@@ -171,7 +153,7 @@ def generate_launch_description():
         cmd=['gzclient'],
         cwd=[launch_dir], output='screen')
 
-    x_urdf = os.path.join(my_dir, 'description', 'robot.urdf.xacro')
+    x_urdf = os.path.join(robit_dir, 'urdf', 'robitcubebot.urdf.xacro')
     p_urdf = xacro.process_file(x_urdf)
     urdf = p_urdf.toxml()
     robot_description_config = urdf
@@ -188,16 +170,16 @@ def generate_launch_description():
         remappings=remappings)
 
     start_gazebo_spawner_cmd = Node(
-    package='gazebo_ros',
-    executable='spawn_entity.py',
-    output='screen',
-    arguments=[
-        '-topic', 'robot_description',
-        '-entity', robot_name,
-        '-robot_namespace', namespace,
-        '-x', pose['x'], '-y', pose['y'], '-z', pose['z'],
-        '-R', pose['R'], '-P', pose['P'], '-Y', pose['Y']]
-)
+        package='gazebo_ros',
+        executable='spawn_entity.py',
+        output='screen',
+        arguments=[
+            '-topic', 'robot_description',
+            '-entity', robot_name,
+            '-robot_namespace', namespace,
+            '-x', pose['x'], '-y', pose['y'], '-z', pose['z'],
+            '-R', pose['R'], '-P', pose['P'], '-Y', pose['Y']]
+    )
 
     rviz_cmd = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
@@ -232,7 +214,6 @@ def generate_launch_description():
     ld.add_action(declare_params_file_cmd)
     ld.add_action(declare_autostart_cmd)
     ld.add_action(declare_use_composition_cmd)
-
     ld.add_action(declare_rviz_config_file_cmd)
     ld.add_action(declare_use_simulator_cmd)
     ld.add_action(declare_use_robot_state_pub_cmd)
@@ -244,6 +225,7 @@ def generate_launch_description():
     ld.add_action(declare_use_respawn_cmd)
 
     # Add any conditioned actions
+    ld.add_action(set_gazebo_model_path_cmd)
     ld.add_action(start_gazebo_server_cmd)
     ld.add_action(start_gazebo_client_cmd)
     ld.add_action(start_gazebo_spawner_cmd)

@@ -1,6 +1,38 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="robitcubebot">
 
+     <!-- Move this one to ros2 control -->
+    <transmission name="front_right_wheel_transmission">
+        <plugin>transmission_interface/SimpleTransmission</plugin>
+        <actuator name="front_wheel_right_motor" role="front_actuator_right"/>
+        <joint name="front_wheel_right_joint"    role="front_joint_right">
+        <mechanical_reduction>1.0</mechanical_reduction>
+        </joint>
+    </transmission>
+
+    <transmission name="front_left_wheel_transmission">
+        <plugin>transmission_interface/SimpleTransmission</plugin>
+        <actuator name="front_wheel_left_motor" role="front_actuator_left"/>
+        <joint name="front_wheel_left_joint"    role="front_joint_left">
+        <mechanical_reduction>1.0</mechanical_reduction>
+        </joint>
+    </transmission>
+    <transmission name="back_right_wheel_transmission">
+        <plugin>transmission_interface/SimpleTransmission</plugin>
+        <actuator name="back_wheel_right_motor" role="back_actuator_right"/>
+        <joint name="back_wheel_right_joint"    role="back_joint_right">
+        <mechanical_reduction>1.0</mechanical_reduction>
+        </joint>
+    </transmission>
+
+    <transmission name="back_left_wheel_transmission">
+        <plugin>transmission_interface/SimpleTransmission</plugin>
+        <actuator name="back_wheel_left_motor" role="back_actuator_left"/>
+        <joint name="back_wheel_left_joint"    role="back_joint_left">
+        <mechanical_reduction>1.0</mechanical_reduction>
+        </joint>
+    </transmission>
+
     <ros2_control name="RobotSystem" type="system">
 
         <!-- ros2_control Gazebo -->
