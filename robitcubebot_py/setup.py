@@ -25,6 +25,8 @@ setup(
             "test_teleop= robitcubebot_py.teleop_keyboard:main",
             "simple_key_publisher= robitcubebot_py.simple_key_publisher:main",
             "nav2_test= robitcubebot_py.nav2_test:main"
+            "gripper_controller= robitcubebot_py.gripper_controller:main",
+            "move_group_client= robitcubebot_py.move_group_client:main",
 
             
 

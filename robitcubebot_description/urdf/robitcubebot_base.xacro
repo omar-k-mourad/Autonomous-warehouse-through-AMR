@@ -15,7 +15,7 @@
     <xacro:box_inertia m="0.6" l="${2*base_length}" w="${2*base_width}" h="${2*base_height}"
                            xyz="0 0 ${base_height / 2.0}" rpy="0 0 0" />
     <visual>
-      <origin xyz="${base_length / 2.0} ${base_width / 2.0} 0" rpy="0 0 3.14" />
+      <origin xyz="-${base_length / 2.0} -${base_width / 2.0} 0" rpy="0 0 0" />
       <geometry>
         <mesh filename="package://robitcubebot_description/meshes/base_link.STL" scale="0.001 0.001 0.001" />
         
@@ -42,7 +42,7 @@
 
   <!-- Wheels -->
 
-  <link name="back_wheel_left_link">
+  <link name="front_wheel_right_link">
     <inertial>
       <origin xyz="0 -0.014 0" rpy="0 0 0" />
       <mass value="0.0530086090966721" />
@@ -64,96 +64,96 @@
     </collision>
   </link>
 
-  <joint name="back_wheel_left_joint" type="continuous">
-    <origin xyz="-${base_width / 1.8} -${base_width / 2} ${wheel_radius}" rpy="0 0 0" />
-    <parent link="base_link" />
-    <child link="back_wheel_left_link" />
-    <axis xyz="0 1 0" />
-  </joint>
-  <link
-    name="back_wheel_right_link">
-    <inertial>
-      <origin xyz="0 0.014 0" rpy="0 0 0" />
-      <mass value="0.0530086043217644" />
-      <inertia ixx="1.8792911368909E-05"  ixy="3.31256392204584E-10" ixz="-1.14082001662767E-08"
-               iyy="3.11510738759073E-05" iyz="-3.60499245082192E-10"
-               izz="1.88266886146847E-05" />
-    </inertial>
-    <visual>
-      <origin xyz="0 0 0" rpy="-1.57 0 0" />
-      <geometry>
-        <mesh filename="package://robitcubebot_description/meshes/wheel_left_link.STL" />
-      </geometry>
-    </visual>
-    <collision>
-      <origin xyz="0 0.015 0" rpy="-1.57 0 0" />
-      <geometry>
-        <sphere radius="0.033"/>
-      </geometry>
-    </collision>
-  </link>
-  <joint name="back_wheel_right_joint" type="continuous">
-    <origin xyz="-${base_width / 1.8} ${base_width / 2.1} ${wheel_radius}" rpy="0 0 0" />
-    <parent link="base_link" />
-    <child link="back_wheel_right_link" />
-    <axis xyz="0 1 0" />
-  </joint>
-  <link name="front_wheel_left_link">
-    <inertial>
-      <origin xyz="0 -0.014 0" rpy="0 0 0" />
-      <mass value="0.0530086090966721" />
-      <inertia ixx="1.88176298336665E-05" ixy="-4.8444933029987E-10" ixz="1.88163708851143E-08"
-               iyy="3.11510738647764E-05" iyz="-6.93560663069607E-11"
-               izz="1.8801969558182E-05" />
-    </inertial>
-    <visual>
-      <origin xyz="0 0 0" rpy="1.57 0 0" />
-      <geometry>
-        <mesh filename="package://robitcubebot_description/meshes/wheel_right_link.STL" />
-      </geometry>
-    </visual>
-    <collision>
-      <origin xyz="0 -0.015 0" rpy="1.57 0 0" />
-      <geometry>
-        <sphere radius="0.033"/>
-      </geometry>
-    </collision>
-  </link>
-
-  <joint name="front_wheel_left_joint" type="continuous">
-    <origin xyz="${base_width / 1.8} -${base_width / 2} ${wheel_radius}" rpy="0 0 0" />
-    <parent link="base_link" />
-    <child link="front_wheel_left_link" />
-    <axis xyz="0 1 0" />
-
-  </joint>
-  <link
-    name="front_wheel_right_link">
-    <inertial>
-      <origin xyz="0 0.014 0" rpy="0 0 0" />
-      <mass value="0.0530086043217644" />
-      <inertia ixx="1.8792911368909E-05"  ixy="3.31256392204584E-10" ixz="-1.14082001662767E-08"
-               iyy="3.11510738759073E-05" iyz="-3.60499245082192E-10"
-               izz="1.88266886146847E-05" />
-    </inertial>
-    <visual>
-      <origin xyz="0 0 0" rpy="-1.57 0 0" />
-      <geometry>
-        <mesh filename="package://robitcubebot_description/meshes/wheel_left_link.STL" />
-      </geometry>
-    </visual>
-    <collision>
-      <origin xyz="0 0.015 0" rpy="-1.57 0 0" />
-      <geometry>
-        <sphere radius="0.033"/>
-      </geometry>
-    </collision>
-  </link>
   <joint name="front_wheel_right_joint" type="continuous">
-    <origin xyz="${base_width / 1.8} ${base_width / 2.1} ${wheel_radius}" rpy="0 0 0" />
+    <origin xyz="-${base_width / 1.8} -${base_width / 2.1} ${wheel_radius}" rpy="0 0 0" />
     <parent link="base_link" />
     <child link="front_wheel_right_link" />
-    <axis xyz="0 1 0" />
+    <axis xyz="0 -1 0" />
+  </joint>
+  <link
+    name="front_wheel_left_link">
+    <inertial>
+      <origin xyz="0 0.014 0" rpy="0 0 0" />
+      <mass value="0.0530086043217644" />
+      <inertia ixx="1.8792911368909E-05"  ixy="3.31256392204584E-10" ixz="-1.14082001662767E-08"
+               iyy="3.11510738759073E-05" iyz="-3.60499245082192E-10"
+               izz="1.88266886146847E-05" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="-1.57 0 0" />
+      <geometry>
+        <mesh filename="package://robitcubebot_description/meshes/wheel_left_link.STL" />
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0 0.015 0" rpy="-1.57 0 0" />
+      <geometry>
+        <sphere radius="0.033"/>
+      </geometry>
+    </collision>
+  </link>
+  <joint name="front_wheel_left_joint" type="continuous">
+    <origin xyz="-${base_width / 1.8} ${base_width / 2.1} ${wheel_radius}" rpy="0 0 0" />
+    <parent link="base_link" />
+    <child link="front_wheel_left_link" />
+    <axis xyz="0 -1 0" />
+  </joint>
+  <link name="back_wheel_right_link">
+    <inertial>
+      <origin xyz="0 -0.014 0" rpy="0 0 0" />
+      <mass value="0.0530086090966721" />
+      <inertia ixx="1.88176298336665E-05" ixy="-4.8444933029987E-10" ixz="1.88163708851143E-08"
+               iyy="3.11510738647764E-05" iyz="-6.93560663069607E-11"
+               izz="1.8801969558182E-05" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="1.57 0 0" />
+      <geometry>
+        <mesh filename="package://robitcubebot_description/meshes/wheel_right_link.STL" />
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0 -0.015 0" rpy="1.57 0 0" />
+      <geometry>
+        <sphere radius="0.033"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <joint name="back_wheel_right_joint" type="continuous">
+    <origin xyz="${base_width / 1.8} -${base_width / 2.1} ${wheel_radius}" rpy="0 0 0" />
+    <parent link="base_link" />
+    <child link="back_wheel_right_link" />
+    <axis xyz="0 -1 0" />
+
+  </joint>
+  <link
+    name="back_wheel_left_link">
+    <inertial>
+      <origin xyz="0 0.014 0" rpy="0 0 0" />
+      <mass value="0.0530086043217644" />
+      <inertia ixx="1.8792911368909E-05"  ixy="3.31256392204584E-10" ixz="-1.14082001662767E-08"
+               iyy="3.11510738759073E-05" iyz="-3.60499245082192E-10"
+               izz="1.88266886146847E-05" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="-1.57 0 0" />
+      <geometry>
+        <mesh filename="package://robitcubebot_description/meshes/wheel_left_link.STL" />
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0 0.015 0" rpy="-1.57 0 0" />
+      <geometry>
+        <sphere radius="0.033"/>
+      </geometry>
+    </collision>
+  </link>
+  <joint name="back_wheel_left_joint" type="continuous">
+    <origin xyz="${base_width / 1.8} ${base_width / 2.1} ${wheel_radius}" rpy="0 0 0" />
+    <parent link="base_link" />
+    <child link="back_wheel_left_link" />
+    <axis xyz="0 -1 0" />
 
   </joint>
 
@@ -162,7 +162,7 @@
     <xacro:box_inertia m="0.6" l="${2*base_length}" w="${2*base_width}" h="${2*base_height}"
                            xyz="0 0 ${base_height / 2.0}" rpy="0 0 0" />
     <visual>
-      <origin xyz="${base_length / 1.75} 0.165 0" rpy="0 0 3.14" />
+      <origin xyz="-${base_length / 1.75} -0.165 0" rpy="0 0 0" />
       <geometry>
         <mesh filename="package://robitcubebot_description/meshes/upper_link.STL" scale="0.001 0.001 0.001" />
         

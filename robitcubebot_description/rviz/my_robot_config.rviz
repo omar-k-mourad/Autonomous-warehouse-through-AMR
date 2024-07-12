@@ -10,12 +10,6 @@ Panels:
         - /TF1/Frames1
         - /RobotModel1
         - /LaserScan1
-        - /Map1
-        - /Map1/Topic1
-        - /Map2
-        - /Map2/Topic1
-        - /Map3
-        - /Map3/Topic1
       Splitter Ratio: 0.6941176652908325
     Tree Height: 719
   - Class: rviz_common/Selection
@@ -84,8 +78,6 @@ Visualization Manager:
           Value: true
         link_platform_mid:
           Value: false
-        map:
-          Value: true
         odom:
           Value: true
         upper_link:
@@ -96,26 +88,27 @@ Visualization Manager:
       Show Axes: true
       Show Names: true
       Tree:
-        map:
-          odom:
-            base_footprint:
-              base_link:
-                back_wheel_left_link:
-                  {}
-                back_wheel_right_link:
-                  {}
-                front_wheel_left_link:
-                  {}
-                front_wheel_right_link:
+        odom:
+          base_footprint:
+            base_link:
+              back_wheel_left_link:
+                {}
+              back_wheel_right_link:
+                {}
+              front_wheel_left_link:
+                {}
+              front_wheel_right_link:
+                {}
+              upper_link:
+                imu_link:
                   {}
                 laser_frame:
                   {}
-                upper_link:
-                  imu_link:
+                link_platform_mid:
+                  lift_link:
                     {}
-                  link_platform_mid:
-                    lift_link:
-                      {}
+          base_footprint_noisy:
+            {}
       Update Interval: 0
       Value: true
     - Alpha: 1
@@ -232,73 +225,10 @@ Visualization Manager:
       Use Fixed Frame: true
       Use rainbow: true
       Value: true
-    - Alpha: 0.699999988079071
-      Class: rviz_default_plugins/Map
-      Color Scheme: map
-      Draw Behind: false
-      Enabled: true
-      Name: Map
-      Topic:
-        Depth: 5
-        Durability Policy: Volatile
-        Filter size: 10
-        History Policy: Keep Last
-        Reliability Policy: Reliable
-        Value: /global_costmap/costmap
-      Update Topic:
-        Depth: 5
-        Durability Policy: Volatile
-        History Policy: Keep Last
-        Reliability Policy: Reliable
-        Value: /global_costmap/costmap_updates
-      Use Timestamp: false
-      Value: true
-    - Alpha: 0.699999988079071
-      Class: rviz_default_plugins/Map
-      Color Scheme: map
-      Draw Behind: false
-      Enabled: true
-      Name: Map
-      Topic:
-        Depth: 5
-        Durability Policy: Volatile
-        Filter size: 10
-        History Policy: Keep Last
-        Reliability Policy: Reliable
-        Value: /local_costmap/costmap
-      Update Topic:
-        Depth: 5
-        Durability Policy: Volatile
-        History Policy: Keep Last
-        Reliability Policy: Reliable
-        Value: /local_costmap/costmap_updates
-      Use Timestamp: false
-      Value: true
-    - Alpha: 0.699999988079071
-      Class: rviz_default_plugins/Map
-      Color Scheme: map
-      Draw Behind: false
-      Enabled: true
-      Name: Map
-      Topic:
-        Depth: 5
-        Durability Policy: Transient Local
-        Filter size: 10
-        History Policy: Keep Last
-        Reliability Policy: Reliable
-        Value: /map
-      Update Topic:
-        Depth: 5
-        Durability Policy: Volatile
-        History Policy: Keep Last
-        Reliability Policy: Reliable
-        Value: /map_updates
-      Use Timestamp: false
-      Value: true
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
-    Fixed Frame: map
+    Fixed Frame: odom
     Frame Rate: 30
   Name: root
   Tools:
@@ -341,25 +271,25 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz_default_plugins/Orbit
-      Distance: 5.2609429359436035
+      Distance: 0.8286823630332947
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: -0.006550222635269165
-        Y: 0.959651529788971
-        Z: 1.5492557287216187
+        X: 0.1656811237335205
+        Y: -0.2012619525194168
+        Z: -0.02384302392601967
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 1.1353981494903564
+      Pitch: 0.6453980207443237
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 3.0904130935668945
+      Yaw: 4.293593883514404
     Saved:
       - Class: rviz_default_plugins/Orbit
         Distance: 1.2233526706695557
