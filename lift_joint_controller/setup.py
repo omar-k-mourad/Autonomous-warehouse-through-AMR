@@ -23,3 +23,4 @@ setup(
             'lift_joint_publisher = lift_joint_controller.lift_joint_publisher:main'
         ],
     },
+)
