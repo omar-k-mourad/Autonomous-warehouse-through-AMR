@@ -1,0 +1,7 @@
+# LiftJoint.action
+
+float64 target_position
+---
+bool success
+---
+float64 current_position

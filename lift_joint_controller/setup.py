@@ -1,6 +1,6 @@
 from setuptools import find_packages, setup
 
-package_name = 'robitcubebot_py'
+package_name = 'lift_joint_controller'
 
 setup(
     name=package_name,
@@ -15,12 +15,11 @@ setup(
     zip_safe=True,
     maintainer='your_name',
     maintainer_email='your_email@example.com',
-    description='Lift joint controller package',
+    description='ROS2 package to control lift joint',
     license='Your license',
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'lift_joint_controller = lift_joint_controller.lift_joint_controller:main',
+            'lift_joint_publisher = lift_joint_controller.lift_joint_publisher:main'
         ],
     },
-)
