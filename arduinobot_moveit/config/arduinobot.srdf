@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<robot name="arduinobot">
+
+    <virtual_joint name="virtual_joint" type="fixed" parent_frame="world" child_link="base_footprint"/>
+
+    <group name="gripper">
+        <joint name="lift_joint"/>
+    </group>
+    <group_state name="home" group="gripper">
+        <joint name="lift_joint" value="0"/>
+    </group_state>
+    <!--END EFFECTOR: Purpose: Represent information about an end effector.-->
+    <!--PASSIVE JOINT: Purpose: this element is used to mark joints that are not actuated-->
+    <!-- <passive_joint name="joint_5"/> -->
+    <!--DISABLE COLLISIONS: By default it is assumed that any link of the robot could potentially come into collision with any other link in the robot. This tag disables collision checking between a specified pair of links. -->
+    <disable_collisions link1="base_link" link2="link_platform_mid" reason="Adjacent"/>
+    <disable_collisions link1="link_platform_mid" link2="lift_link" reason="Adjacent"/>
+    <disable_collisions link1="base_link" link2="right_wheel" reason="Adjacent"/>
+    <disable_collisions link1="base_link" link2="left_wheel" reason="Adjacent"/>
+    <disable_collisions link1="base_link" link2="caster_wheel" reason="Adjacent"/>
+    <disable_collisions link1="base_link" link2="lift_link" reason="Never"/>
+    <disable_collisions link1="upper_link" link2="lift_link" reason="Never"/>
+    <disable_collisions link1="right_wheel" link2="lift_link" reason="Never"/>
+    <disable_collisions link1="left_wheel" link2="lift_link" reason="Never"/>
+    <disable_collisions link1="caster_wheel" link2="lift_link" reason="Never"/>
+
+
+</robot>
