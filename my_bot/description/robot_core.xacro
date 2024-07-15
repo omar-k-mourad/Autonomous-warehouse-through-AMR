@@ -216,7 +216,7 @@
   <joint name="platform_joint" type="fixed">
     <parent link="chassis" />
     <child link="link_platform_mid" />
-    <origin xyz="0.0 0 0.02" rpy="0 0 0"/>
+    <origin xyz="0.25 0 0.15" rpy="0 0 0"/>
   </joint>
 
   <!-- Link for the lift mechanism -->
@@ -224,7 +224,7 @@
     <visual>
       <origin xyz="-${plate_radius/1.1} -${plate_radius/1.1}  0.0" rpy="0 0 0"/>
       <geometry>
-        <mesh filename="package://arduinobot_description/meshes/upperstand.STL" scale="0.001 0.001 0.001" />
+        <mesh filename="package://my_bot/meshes/upperstand.STL" scale="0.001 0.001 0.001" />
       </geometry>
       <material name="black">
         <color rgba="0.1 0.1 0.1 1" />
@@ -249,7 +249,7 @@
     <parent link="link_platform_mid" />
     <child link="lift_link" />
     <axis xyz="0 0 1" rpy="0 0 0"/>
-    <limit effort="100.0" lower="-0.05" upper="0.035" velocity="1.0"/>
+    <limit effort="100.0" lower="-0.05" upper="0.5" velocity="1.0"/>
     <dynamics damping="0.1" friction="0.1"/>
     <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
   </joint>
