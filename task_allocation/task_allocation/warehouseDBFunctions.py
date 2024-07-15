@@ -231,4 +231,3 @@ def get_ordered_products(sqs_client, queue_url):
             )
     
     return ordered_products
-print(getSlotsLocations('picking'))

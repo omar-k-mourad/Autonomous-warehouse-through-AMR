@@ -36,6 +36,7 @@ def main():
 
     # set the number of robots and create nav2 object for each robot
     robots_num = 2
+    """ 
     nav_list = []
     print("creating nav2 ojects.....")
     for i in range(robots_num):
@@ -45,6 +46,7 @@ def main():
     print("starting NAV2.....")
     for nav in nav_list:
         nav.waitUntilNav2Active()
+    """
 
     min_tasks = robots_num
     waiting_time = 10
@@ -78,9 +80,9 @@ def main():
             max_epochs = 100000
             crossover_rate = 0.95
             elitist_percentage = 20
-            distance_strategy = nav_distance
-            nav = nav_list[0]
-
+            distance_strategy = euclidean_distance
+            nav = None
+            
             #disable robots layer before computing costs
             costmap_controller(local_robot_layer_controller, global_robot_layer_controller, False)
             
