@@ -1,4 +1,5 @@
-from warehouseDBFunctions import get_shelves_locations
+from decimal import Decimal
+from warehouseDBFunctions import *
 def unique_ordered_products(ordered_products):
     """
     Aggregates the quantities for each unique product_id in the ordered products.
@@ -14,7 +15,7 @@ def unique_ordered_products(ordered_products):
     # Iterate through the ordered products and aggregate quantities
     for product in ordered_products:
         product_id = product['product_id']
-        quantity = product['quantity']
+        quantity = int(product['quantity'])  # Ensure quantity is an integer
         if product_id in product_quantities:
             product_quantities[product_id] += quantity
         else:
@@ -34,14 +35,14 @@ def min_shelves_greedy(warehouse, order_items, shelves_locations):
         warehouse (list of dict): A list of dictionaries, where each dictionary contains
                                   a shelf_id and items (a dictionary of product IDs and quantities).
         order_items (list of dict): A list of dictionaries, each containing the product ID and the required quantity.
-        dynamodb (boto3.resource): The DynamoDB resource.
+        shelves_locations (dict): A dictionary mapping shelf IDs to their coordinates.
 
     Returns:
         list: A list of coordinates for the shelves to pick items from.
     """
     # Convert order items to a dictionary for efficient lookup
-    order_items_dict = {item['product_id']: item['quantity'] for item in order_items}
-    
+    order_items_dict = {item['product_id']: int(item['quantity']) for item in order_items}
+
     # Track visited shelves and the remaining quantities needed for each item
     visited_shelves = set()
     remaining_items = order_items_dict.copy()
@@ -59,7 +60,7 @@ def min_shelves_greedy(warehouse, order_items, shelves_locations):
             if shelf_id not in visited_shelves:
                 # Calculate the number of items that can be covered by this shelf
                 covered_items = sum(
-                    min(shelf_items.get(product_id, 0), quantity)
+                    min(int(shelf_items.get(product_id, 0) if isinstance(shelf_items.get(product_id, 0), (int, Decimal)) else 0), quantity)
                     for product_id, quantity in remaining_items.items()
                 )
                 if covered_items > max_covered:
@@ -77,7 +78,7 @@ def min_shelves_greedy(warehouse, order_items, shelves_locations):
         items_to_remove = []
         for product_id, quantity in remaining_items.items():
             if product_id in best_shelf_items:
-                remaining_items[product_id] -= min(best_shelf_items[product_id], quantity)
+                remaining_items[product_id] -= min(int(best_shelf_items[product_id]), quantity)
                 if remaining_items[product_id] <= 0:
                     items_to_remove.append(product_id)
         # Remove items that are fully covered
