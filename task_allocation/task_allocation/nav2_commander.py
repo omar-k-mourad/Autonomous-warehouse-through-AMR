@@ -31,7 +31,7 @@ def set_initial_pose():
 def main():
     # --- Init ROS2 communications and Simple Commander API ---
     rclpy.init()
-    nav = BasicNavigator()
+    nav = BasicNavigator(namespace='robot1')
     #nav1 = BasicNavigator(namespace='robot1')
     #nav2 = BasicNavigator(namespace='robot2')
 
@@ -45,15 +45,16 @@ def main():
     #nav2.waitUntilNav2Active()
        
     #start = create_pose_stamped(nav1, 0.0, 0.0, 0.0)
-    goal = create_pose_stamped(nav, 0.05, -2.0, 0.0)
 
     #ans = nav.getPath(start=start, goal=goal, planner_id='GridBased',use_start=True)
     #print(len(ans.poses))
     
     waypoints1 = []
-    shelf_poses1 =   [(1.0, -0.5), (0.5, -0.5), (0.0, -0.5)]
-    waypoints2 = []
-    shelf_poses2 =   [(1.0, 0.5), (0.5, 0.5), (0.0, 0.5)]
+
+    goal = create_pose_stamped(nav, 0.00, 0.00, 0.0)
+
+    waypoints1.append(goal)
+    nav.followWaypoints(waypoints1)
     """ 
     # --- Create some Nav2 goal poses ---
     for i in range(len(shelf_poses1)):
@@ -61,7 +62,8 @@ def main():
         waypoints2.append(create_pose_stamped(nav2, shelf_poses2[i][0], shelf_poses2[i][1], 0.0))
     """
     # --- Going to one pose ---
-    nav.goToPose(goal)
+    
+    #nav.goToPose(goal)
     #while not nav.isTaskComplete():
     #        feedback = nav.getFeedback()
             # print(feedback)
