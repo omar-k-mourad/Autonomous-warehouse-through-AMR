@@ -17,6 +17,7 @@
                 <param name="port">/dev/ttyACM0</param>
             </hardware>
         </xacro:unless>
+
         
         <!-- ros2_control Common Interfaces -->
         <joint name="front_wheel_right_joint">
@@ -62,5 +63,44 @@
             <state_interface name="position"/>
         </joint>
     </ros2_control>
+    <transmission name="front_right_wheel_transmission">
+        <plugin>transmission_interface/SimpleTransmission</plugin>
+        <actuator name="front_wheel_right_motor" role="front_actuator_right"/>
+        <joint name="front_wheel_right_joint"    role="front_joint_right">
+        <mechanical_reduction>1.0</mechanical_reduction>
+        </joint>
+    </transmission>
+
+    <transmission name="front_left_wheel_transmission">
+        <plugin>transmission_interface/SimpleTransmission</plugin>
+        <actuator name="front_wheel_left_motor" role="front_actuator_left"/>
+        <joint name="front_wheel_left_joint"    role="front_joint_left">
+        <mechanical_reduction>1.0</mechanical_reduction>
+        </joint>
+    </transmission>
+    <transmission name="back_right_wheel_transmission">
+        <plugin>transmission_interface/SimpleTransmission</plugin>
+        <actuator name="back_wheel_right_motor" role="back_actuator_right"/>
+        <joint name="back_wheel_right_joint"    role="back_joint_right">
+        <mechanical_reduction>1.0</mechanical_reduction>
+        </joint>
+    </transmission>
+
+    <transmission name="back_left_wheel_transmission">
+        <plugin>transmission_interface/SimpleTransmission</plugin>
+        <actuator name="back_wheel_left_motor" role="back_actuator_left"/>
+        <joint name="back_wheel_left_joint"    role="back_joint_left">
+        <mechanical_reduction>1.0</mechanical_reduction>
+        </joint>
+    </transmission>
+      <!-- ROS 2 Control -->
+    <gazebo>
+        <plugin filename="libgazebo_ros2_control.so" name="gazebo_ros2_control">
+        <robot_param>robot_description</robot_param>
+        <robot_param_node>robot_state_publisher</robot_param_node>
+        <parameters>$(find robitcubebot_controller)/config/robitcubebot_controllers.yaml</parameters>
+        </plugin>
+    </gazebo>
+
 
 </robot>
