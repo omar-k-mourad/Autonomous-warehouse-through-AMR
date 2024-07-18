@@ -1,3 +1,0 @@
-# Parameters for teleop_twist_keyboard
-linear_speed: 0.5
-angular_speed: 1.0
