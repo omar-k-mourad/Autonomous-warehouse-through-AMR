@@ -33,9 +33,9 @@
 
   </link>
   <joint name="platform_joint" type="fixed">
-    <parent link="upper_link" />
+    <parent link="base_link" />
     <child link="link_platform_mid" />
-    <origin xyz="0.0 0 0.02" rpy="0. 0. 0."/>
+    <origin xyz="0.0 0 ${robot_height}" rpy="0. 0. 0."/>
   </joint>
 
 
@@ -72,7 +72,6 @@
     <axis xyz="0 0 1" rpy="0 0 0"/>
     <limit effort="100.0" lower="-0.05" upper="0.035" velocity="1.0"/>
     <dynamics damping="0.1" friction="0.1"/>
-    <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
   </joint>
 
 </robot>
