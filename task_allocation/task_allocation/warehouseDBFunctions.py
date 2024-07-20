@@ -1,6 +1,21 @@
 import boto3
 import json
+import uuid
+from boto3.dynamodb.conditions import Key
+from datetime import datetime
+
+# Initialize the DynamoDB resource and client
 client = boto3.client('dynamodb')
+dynamodb = boto3.resource('dynamodb')
+# Initialize SQS client
+sqs_client = boto3.client('sqs')
+# SQS OrderProductsQueue URL
+queue_url = "https://sqs.eu-north-1.amazonaws.com/381491978736/OrderProductsQueue"
+
+shelf_products_table = dynamodb.Table('ShelfProducts-ei5ggzbrrjghbe3yjny255f35q-dev')
+product_table = dynamodb.Table('Product-ei5ggzbrrjghbe3yjny255f35q-dev')
+shelf_table = dynamodb.Table('Shelf-ei5ggzbrrjghbe3yjny255f35q-dev')
+
 def addAMR(AMRId, curr_Loc = '(0,0)', Battery = 'Full', IsFree = True):
     client.put_item(
         TableName='Warehouse',
@@ -135,7 +150,7 @@ def updateSlotStatus(SlotId, Status):
 #updateSlotStatus('SLOT#1', False)
 #updateAMRStatus('AMR#2', False)
 
-def get_shelves_locations(dynamodb):
+def get_shelves_locations():
     """
     Fetches the shelf locations from the Shelf table in DynamoDB.
 
@@ -145,13 +160,12 @@ def get_shelves_locations(dynamodb):
     Returns:
     dict: A dictionary with shelf IDs as keys and shelf coordinates as values.
     """
-    shelf_table = dynamodb.Table('Shelf-ei5ggzbrrjghbe3yjny255f35q-dev')
     shelf_table_response = shelf_table.scan()
     shelves_locations = {shelf['id']: shelf['shelf_coordinate'] for shelf in shelf_table_response['Items']}
 
     return shelves_locations
 
-def get_warehouse(dynamodb):
+def get_warehouse():
     """
     Retrieves and constructs the warehouse inventory from the DynamoDB 'ShelfProducts' table.
 
@@ -161,7 +175,6 @@ def get_warehouse(dynamodb):
     Returns:
         list of dict: A list of dictionaries representing the shelves and their items.
     """
-    shelf_products_table = dynamodb.Table('ShelfProducts-ei5ggzbrrjghbe3yjny255f35q-dev')
     shelf_products_table_response = shelf_products_table.scan()
     items = shelf_products_table_response['Items']
     warehouse = {}
@@ -195,7 +208,7 @@ def process_message(message):
     data = json.loads(message['Body'])
     return {'product_id': data['product_id'], 'quantity': data['quantity']}
 
-def get_ordered_products(sqs_client, queue_url):
+def get_ordered_products():
     """
     Receives and processes messages from an SQS queue.
 
@@ -231,3 +244,134 @@ def get_ordered_products(sqs_client, queue_url):
             )
     
     return ordered_products
+
+def current_timestamp():
+    # Return the current UTC time in ISO 8601 format with 'Z' at the end
+    return datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3] + 'Z'
+
+def manage_product_on_shelf(action, shelfID, productID, quantity):
+    """
+    Manages products on shelves by either picking or storing items.
+
+    Parameters:
+    - action (str): The action to perform; either 'pick' or 'store'.
+    - shelfID (str): The ID of the shelf where the product is located or being added.
+    - productID (str): The ID of the product to be picked or stored.
+    - quantity (int): The quantity of the product to be picked or added.
+
+    Behavior:
+    - If action is 'pick':
+        - Queries the ShelfProducts table for the specified shelfID and productID.
+        - If the product is found, it updates the `shelf_item_count` by subtracting the specified quantity.
+        - If the updated `shelf_item_count` is zero or less, it deletes the record from the ShelfProducts table.
+        - Updates the `ProductLefts` in the Product table by subtracting the quantity.
+    
+    - If action is 'store':
+        - Queries the ShelfProducts table for the specified shelfID and productID.
+        - If the product is found, it updates the `shelf_item_count` by adding the specified quantity.
+        - If the product is not found, it creates a new record in the ShelfProducts table with a unique ID, setting `createdAt` and `updatedAt` to the current timestamp.
+        - Updates the `ProductLefts` in the Product table by adding the quantity.
+
+    Exceptions:
+    - Catches and prints errors encountered during the process.
+    """
+    try:
+        # Query the ShelfProducts table using the byShelf index
+        response = shelf_products_table.query(
+            IndexName='byShelf',
+            KeyConditionExpression=Key('shelfID').eq(shelfID)
+        )
+
+        # Filter the results for the specific productID
+        items = response.get('Items', [])
+        shelf_product = next((item for item in items if item['productID'] == productID), None)
+
+        if action == 'pick':
+            if not shelf_product:
+                print('Product not found on the shelf.')
+                return
+
+            # Calculate the updated quantity for ShelfProducts
+            updated_shelf_quantity = shelf_product['shelf_item_count'] - quantity
+
+            if updated_shelf_quantity > 0:
+                # Update the quantity and updatedAt in ShelfProducts
+                shelf_products_table.update_item(
+                    Key={
+                        'id': shelf_product['id']
+                    },
+                    UpdateExpression='SET shelf_item_count = :val1, updatedAt = :val2',
+                    ExpressionAttributeValues={
+                        ':val1': updated_shelf_quantity,
+                        ':val2': current_timestamp()
+                    }
+                )
+                print('Product quantity on shelf updated successfully.')
+            else:
+                # Delete the record in ShelfProducts if quantity is 0 or less
+                shelf_products_table.delete_item(
+                    Key={
+                        'id': shelf_product['id']
+                    }
+                )
+                print('Product removed from shelf due to zero quantity.')
+
+            # Update the ProductLefts in the Product table
+            product_table.update_item(
+                Key={
+                    'id': productID
+                },
+                UpdateExpression='SET ProductLefts = ProductLefts - :val3, updatedAt = :val4',
+                ConditionExpression='ProductLefts >= :val3',  # Ensure ProductLefts does not go negative
+                ExpressionAttributeValues={
+                    ':val3': quantity,
+                    ':val4': current_timestamp()
+                }
+            )
+            print('ProductLefts updated successfully in Product table.')
+
+        elif action == 'store':
+            if shelf_product:
+                # If the product is already on the shelf, update the quantity and updatedAt
+                new_shelf_quantity = shelf_product['shelf_item_count'] + quantity
+                shelf_products_table.update_item(
+                    Key={
+                        'id': shelf_product['id']
+                    },
+                    UpdateExpression='SET shelf_item_count = :val1, updatedAt = :val2',
+                    ExpressionAttributeValues={
+                        ':val1': new_shelf_quantity,
+                        ':val2': current_timestamp()
+                    }
+                )
+                print('Product quantity on shelf updated successfully.')
+            else:
+                # If the product is not on the shelf, create a new record with a generated id
+                shelf_products_table.put_item(
+                    Item={
+                        'id': str(uuid.uuid4()),  # Generate a unique ID using UUID
+                        'shelfID': shelfID,
+                        'productID': productID,
+                        'shelf_item_count': quantity,
+                        'createdAt': current_timestamp(),
+                        'updatedAt': current_timestamp(),
+                        '__typename': 'ShelfProducts'
+                    }
+                )
+                print('New product added to the shelf successfully.')
+
+            # Update the ProductLefts in the Product table
+            product_table.update_item(
+                Key={
+                    'id': productID
+                },
+                UpdateExpression='SET ProductLefts = ProductLefts + :val3, updatedAt = :val4',
+                ExpressionAttributeValues={
+                    ':val3': quantity,
+                    ':val4': current_timestamp()
+                }
+            )
+            print('ProductLefts updated successfully in Product table.')
+
+    except Exception as e:
+        print('Error managing product:', e)

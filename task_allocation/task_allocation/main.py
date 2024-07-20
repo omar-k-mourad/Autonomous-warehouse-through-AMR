@@ -6,12 +6,11 @@ from warehouseDBFunctions import *
 from param_config import *
 import ast
 import time
-import boto3
 
-def get_shelves_to_pick(dynamodb, sqs_client, queue_url):
-    ordered_products = get_ordered_products(sqs_client, queue_url)
+def get_shelves_to_pick():
+    ordered_products = get_ordered_products()
     if ordered_products:
-        warehouse, shelves_locations = get_warehouse(dynamodb), get_shelves_locations(dynamodb)
+        warehouse, shelves_locations = get_warehouse(), get_shelves_locations()
         ordered_products = unique_ordered_products(ordered_products)
         shelves_to_pick = min_shelves_greedy(warehouse, ordered_products, shelves_locations)
         task_shelves_coordinates = [ast.literal_eval(item) for item in shelves_to_pick]
@@ -21,15 +20,6 @@ def get_shelves_to_pick(dynamodb, sqs_client, queue_url):
 def main():
     print("Task allocation server starting.....")
     rclpy.init()
-
-    # Initialize the DynamoDB resource
-    dynamodb = boto3.resource('dynamodb')
-
-    # Initialize SQS client
-    sqs_client = boto3.client('sqs')
-
-    # SQS OrderProductsQueue URL
-    queue_url = "https://sqs.eu-north-1.amazonaws.com/381491978736/OrderProductsQueue"
 
     # Controller for the costmap layer to be able to compute paths with a clear costmap
     local_robot_layer_controller = RobotLayerController('/robot1/local_costmap/local_costmap/set_parameters')
@@ -59,14 +49,14 @@ def main():
     try:
         while True:
             print("starting new iteration.....")
-            tasks_queue.extend(get_shelves_to_pick(dynamodb, sqs_client, queue_url))
+            tasks_queue.extend(get_shelves_to_pick())
             print("Tasks: ", tasks_queue)
             
             #wait until collecting min task(8.0, 8.0)
             while len(tasks_queue) < min_tasks:
                 print("waiting for tasks....")
                 time.sleep(waiting_time)
-                tasks_queue.extend(get_shelves_to_pick(dynamodb, sqs_client, queue_url))
+                tasks_queue.extend(get_shelves_to_pick())
 
 
             # setting input parameters for Genetic algorithm
