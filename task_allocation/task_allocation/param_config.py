@@ -5,7 +5,7 @@ from rcl_interfaces.msg import Parameter, ParameterType, ParameterValue
 
 class RobotLayerController(Node):
     def __init__(self, service_name):
-        super().__init__('gradient_layer_controller')
+        super().__init__('robots_layer_controller')
         self.set_client = self.create_client(SetParameters, service_name)
         
         while not self.set_client.wait_for_service(timeout_sec=1.0):
@@ -29,6 +29,6 @@ class RobotLayerController(Node):
 
 def costmap_controller(local_robot_layer_controller, global_robot_layer_controller, enabled):
     local_robot_layer_controller.set_layer_enabled('voxel_layer.enabled', enabled)
-    local_robot_layer_controller.set_layer_enabled('gradient_layer.enabled', enabled)
+    local_robot_layer_controller.set_layer_enabled('robots_layer.enabled', enabled)
     global_robot_layer_controller.set_layer_enabled('obstacle_layer.enabled', enabled)
-    global_robot_layer_controller.set_layer_enabled('gradient_layer.enabled', enabled)
+    global_robot_layer_controller.set_layer_enabled('robots_layer.enabled', enabled)

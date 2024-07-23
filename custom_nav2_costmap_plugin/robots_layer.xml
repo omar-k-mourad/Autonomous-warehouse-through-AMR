@@ -1,0 +1,5 @@
+<library path="custom_nav2_costmap_plugin_core">
+  <class name="custom_nav2_costmap_plugin/RobotsLayer" type="custom_nav2_costmap_plugin::RobotsLayer" base_class_type="nav2_costmap_2d::Layer">
+    <description>This is plugin which updates costmap with robot's footprint</description>
+  </class>
+</library>
