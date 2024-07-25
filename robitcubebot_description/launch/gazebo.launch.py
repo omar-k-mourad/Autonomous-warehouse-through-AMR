@@ -24,7 +24,7 @@ def generate_launch_description():
                     get_package_share_directory(package_name),'launch','rsp.launch.py'
                 )]), launch_arguments={'use_sim_time': 'true'}.items()
     )
-
+    gazebo_params_file = os.path.join(get_package_share_directory('robitcubebot_bringup'),'config','lift_params.yaml')
     # Include the Gazebo launch file, provided by the gazebo_ros package
     gazebo = IncludeLaunchDescription(
                 PythonLaunchDescriptionSource([os.path.join(
@@ -36,7 +36,24 @@ def generate_launch_description():
                         arguments=['-topic', 'robot_description',
                                    '-entity', 'my_bot'],
                         output='screen')
+    joint_broad_spawner = Node(
+        package="controller_manager",
+        executable="spawner",
+        arguments=["joint_broad"],
+    )
+    gripper_controller_spawner = Node(
+        package="controller_manager",
+        executable="spawner",
+        arguments=["gripper_controller", "--controller-manager", "/controller_manager"],
+    )
 
+    moveit_node = IncludeLaunchDescription(
+        os.path.join(
+            get_package_share_directory("robitcubebot_moveit"),
+            "launch",
+            "moveit.launch.py"
+        )
+    )
 
 
     # Launch them all!
@@ -44,5 +61,8 @@ def generate_launch_description():
         display_and_rviz,
         gazebo,
         spawn_entity,
+        joint_broad_spawner,
+        gripper_controller_spawner,
+        moveit_node
 
     ])

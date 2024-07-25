@@ -17,7 +17,6 @@ diff_drive_controller:
     right_wheel_names: ["front_wheel_right_joint", "back_wheel_right_joint"]
     wheel_separation: 0.24
     wheel_radius: 0.0325  # half of wheel diameter
-
     publish_rate: 100.0
     open_loop: true
     velocity_rolling_window_size: 10

@@ -25,7 +25,7 @@ setup(
             "miniterm= robitcubebot_python.miniterm:main",
             "arduino_transimitter= robitcubebot_python.simple_serial_transmitter:main",
             "arduino_receiver= robitcubebot_python.simple_serial_receiver:main",
-            
+            "lift_controller= robitcubebot_python.gripper_controller:main",
             
 
         ],

@@ -5,47 +5,25 @@
   <xacro:property name="screw_length" value="0.10" />
   <xacro:property name="plate_radius" value="0.045" />
   <xacro:property name="screw_length" value="0.10" />
+
+
+  <xacro:macro name="lifter_transmission" params="joint_name actuator_name">
+    <transmission name="${joint_name}_transmission">
+        <plugin>transmission_interface/SimpleTransmission</plugin>
+        <actuator name="${actuator_name}" role="actuator1"/>
+        <joint name="${joint_name}" role="joint1">
+            <mechanical_reduction>1.0</mechanical_reduction>
+        </joint>
+    </transmission>
+  </xacro:macro>
+
+
+   <!-- Link for the platform mid -->
   <link name="link_platform_mid">
     <origin xyz="0 0 0.0" rpy="0 0 0"/>
-
     <visual>
       <geometry>
-        <mesh filename="package://robitcubebot_description/meshes/Lead_screw.STL" scale="0.001 0.001 0.001" />
-      </geometry>
-      <material name="black">
-          <color rgba="0.1 0.1 0.1 1" />
-      </material>
-
-    </visual>
-    <collision>
-      <geometry>
-        <box size="0.02 0.02 0.10" />
-      </geometry>
-    </collision>
-
-    <inertial>
-      <mass value="1"/>
-      <inertia
-              ixx="1.0" ixy="0.0" ixz="0.0"
-              iyy="1.0" iyz="0.0"
-              izz="1.0"/>
-    </inertial>
-
-  </link>
-  <joint name="platform_joint" type="fixed">
-    <parent link="base_link" />
-    <child link="link_platform_mid" />
-    <origin xyz="0.0 0 ${robot_height}" rpy="0. 0. 0."/>
-  </joint>
-
-
-  <link name="lift_link">
-    
-
-    <visual>
-      <origin xyz="-${plate_radius/1.1} -${plate_radius/1.1}  0.0" rpy="0 0 0"/>
-      <geometry>
-        <mesh filename="package://robitcubebot_description/meshes/upperstand.STL" scale="0.001 0.001 0.001" />
+        <cylinder radius="0.005" length="0.04"/>
       </geometry>
       <material name="black">
         <color rgba="0.1 0.1 0.1 1" />
@@ -53,25 +31,49 @@
     </visual>
     <collision>
       <geometry>
-         <mesh filename="package://robitcubebot_description/meshes/upperstand.STL" scale="0.001 0.001 0.001" />
+         <cylinder radius="0.01" length="0.04"/>
       </geometry>
     </collision>
     <inertial>
       <mass value="1"/>
-      <inertia
-              ixx="1.0" ixy="0.0" ixz="0.0"
-              iyy="1.0" iyz="0.0"
-              izz="1.0"/>
+      <inertia ixx="1.0" ixy="0.0" ixz="0.0"
+               iyy="1.0" iyz="0.0"
+               izz="1.0"/>
     </inertial>
   </link>
-  
-  <joint name="lift_joint" type="prismatic">
-    <origin xyz="0 0 0.03" rpy="0 0 0"/>
-    <parent link="link_platform_mid" />
-    <child link="lift_link" />
-    <axis xyz="0 0 1" rpy="0 0 0"/>
-    <limit effort="100.0" lower="-0.05" upper="0.035" velocity="1.0"/>
-    <dynamics damping="0.1" friction="0.1"/>
+
+  <!-- Joint connecting upper link to platform mid -->
+  <joint name="platform_joint" type="fixed">
+    <parent link="base_link" />
+    <child link="link_platform_mid" />
+    <origin xyz="0.0 0 ${robot_height+0.015}" rpy="0 0 0"/>
   </joint>
+
+  <!-- Link for the lift mechanism -->
+  <link name="lift_link">
+    <visual>
+      <origin xyz="0 0  0.0" rpy="0 0 0"/>
+      <geometry>
+        <cylinder radius="0.06" length="0.0015"/>
+      </geometry>
+      <material name="black">
+        <color rgba="0.1 0.1 0.1 1" />
+      </material>
+    </visual>
+    <collision>
+      <geometry>
+        <cylinder radius="0.08" length="0.001"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <mass value="1"/>
+      <inertia ixx="1.0" ixy="0.0" ixz="0.0"
+               iyy="1.0" iyz="0.0"
+               izz="1.0"/>
+    </inertial>
+  </link>
+
+
+
 
 </robot>

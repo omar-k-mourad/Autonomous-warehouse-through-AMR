@@ -17,14 +17,14 @@ def generate_launch_description():
     )
 
     moveit_config = (
-        MoveItConfigsBuilder("robitcubebot", package_name="robitcubebot_moveit")
+        MoveItConfigsBuilder("arduinobot", package_name="robitcubebot_moveit")
         .robot_description(file_path=os.path.join(
             get_package_share_directory("robitcubebot_description"),
             "urdf",
             "robitcubebot.urdf.xacro"
             )
         )
-        .robot_description_semantic(file_path="config/robitcubebot.srdf")
+        .robot_description_semantic(file_path="config/arduinobot.srdf")
         .trajectory_execution(file_path="config/moveit_controllers.yaml")
         .to_moveit_configs()
     )

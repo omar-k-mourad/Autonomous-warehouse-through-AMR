@@ -51,12 +51,19 @@ def generate_launch_description():
         arguments=["joint_broad"],
     )
 
-
+    moveit_node = IncludeLaunchDescription(
+        os.path.join(
+            get_package_share_directory("robitcubebot_moveit"),
+            "launch",
+            "moveit.launch.py"
+        )
+    )
     # Launch them all!
     return LaunchDescription([
         display_and_rviz,
         gazebo,
         spawn_entity,
         diff_drive_spawner,
-        joint_broad_spawner
+        joint_broad_spawner,
+        moveit_node
     ])
