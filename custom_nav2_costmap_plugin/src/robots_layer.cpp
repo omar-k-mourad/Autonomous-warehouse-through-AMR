@@ -3,6 +3,7 @@
 #include "nav2_costmap_2d/costmap_math.hpp"
 #include "nav2_costmap_2d/footprint.hpp"
 #include "rclcpp/parameter_events_filter.hpp"
+#include "nav2_util/node_utils.hpp"
 
 using nav2_costmap_2d::LETHAL_OBSTACLE;
 using nav2_costmap_2d::INSCRIBED_INFLATED_OBSTACLE;
@@ -28,7 +29,15 @@ RobotsLayer::onInitialize()
 {
   auto node = node_.lock();
   declareParameter("enabled", rclcpp::ParameterValue(true));
+  declareParameter("robot_footprint", rclcpp::ParameterValue(std::vector<double>{}));
+
   node->get_parameter(name_ + "." + "enabled", enabled_);
+  node->get_parameter(name_ + "." + "robot_footprint", robot_footprint_vec_);
+
+  
+  if (!robot_footprint_vec_.empty()) {
+    robot_footprint_ = parseFootprint(robot_footprint_vec_);
+  }
 
   // Get the robot name from the namespace
   std::string namespace_ = node->get_namespace();
@@ -58,6 +67,7 @@ RobotsLayer::onInitialize()
   }
 }
 
+
 void RobotsLayer::amclPoseCallback(const geometry_msgs::msg::PoseWithCovarianceStamped::SharedPtr msg)
 {
   current_pose_.pose = msg->pose.pose;
@@ -84,6 +94,7 @@ RobotsLayer::updateBounds(
     *min_y = -std::numeric_limits<float>::max();
     *max_x = std::numeric_limits<float>::max();
     *max_y = std::numeric_limits<float>::max();
+    
     need_recalculation_ = false;
   } else {
     double tmp_min_x = last_min_x_;
@@ -113,6 +124,20 @@ RobotsLayer::onFootprintChanged()
     layered_costmap_->getFootprint().size());
 }
 
+
+std::vector<geometry_msgs::msg::Point> RobotsLayer::parseFootprint(const std::vector<double>& footprint)
+{
+  std::vector<geometry_msgs::msg::Point> footprint_points;
+  for (size_t i = 0; i < footprint.size(); i += 2) {
+    geometry_msgs::msg::Point point;
+    point.x = footprint[i];
+    point.y = footprint[i + 1];
+    point.z = 0.0;
+    footprint_points.push_back(point);
+  }
+  return footprint_points;
+}
+
 // The method is called when costmap recalculation is required.
 // It updates the costmap within its window bounds.
 // Inside this method the costmap gradient is generated and is writing directly
@@ -122,6 +147,8 @@ RobotsLayer::updateCosts(
   nav2_costmap_2d::Costmap2D &master_grid, int min_i, int min_j, int max_i, int max_j)
 {
   node_.lock()->get_parameter(name_ + "." + "enabled", enabled_);
+  node_.lock()->get_parameter(name_ + "." + "robot_footprint", robot_footprint_vec_);
+
   if (!enabled_ || !pose_received_) {
     return;
   }
@@ -129,37 +156,10 @@ RobotsLayer::updateCosts(
   // Use the current robot pose
   geometry_msgs::msg::PoseStamped robot_pose = current_pose_;
 
-  // Define the footprint points
-  std::vector<geometry_msgs::msg::Point> footprint_points;
-
-  geometry_msgs::msg::Point p1;
-  p1.x = 0.21;
-  p1.y = 0.21;
-  p1.z = 0.0;
-  footprint_points.push_back(p1);
-
-  geometry_msgs::msg::Point p2;
-  p2.x = 0.21;
-  p2.y = -0.21;
-  p2.z = 0.0;
-  footprint_points.push_back(p2);
-
-  geometry_msgs::msg::Point p3;
-  p3.x = -0.21;
-  p3.y = -0.21;
-  p3.z = 0.0;
-  footprint_points.push_back(p3);
-
-  geometry_msgs::msg::Point p4;
-  p4.x = -0.21;
-  p4.y = 0.21;
-  p4.z = 0.0;
-  footprint_points.push_back(p4);
-
   // Iterate over the footprint points and update the costmap
-  for (size_t i = 0; i < footprint_points.size(); ++i) {
-    const auto &start = footprint_points[i];
-    const auto &end = footprint_points[(i + 1) % footprint_points.size()];
+  for (size_t i = 0; i < robot_footprint_.size(); ++i) {
+    const auto &start = robot_footprint_[i];
+    const auto &end =robot_footprint_[(i + 1) % robot_footprint_.size()];
 
     // Generate points along the perimeter
     double dx = end.x - start.x;
@@ -205,7 +205,7 @@ RobotsLayer::updateCosts(
   }
 }
 
-}  // namespace custom_nav2_costmap_plugin
+} // namespace custom_nav2_costmap_plugin
 
 #include "pluginlib/class_list_macros.hpp"
 PLUGINLIB_EXPORT_CLASS(custom_nav2_costmap_plugin::RobotsLayer, nav2_costmap_2d::Layer)

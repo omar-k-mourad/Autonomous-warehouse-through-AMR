@@ -55,7 +55,8 @@
 #include "nav2_costmap_2d/costmap_2d.hpp"
 #include "pluginlib/class_list_macros.hpp"
 #include <geometry_msgs/msg/pose_with_covariance_stamped.hpp>
-
+#include "geometry_msgs/msg/polygon.hpp"
+#include "geometry_msgs/msg/point32.hpp"
 
 namespace custom_nav2_costmap_plugin
 {
@@ -86,7 +87,7 @@ public:
 
   virtual bool isClearable() {return false;}
 
-private:
+protected:
   double last_min_x_, last_min_y_, last_max_x_, last_max_y_;
 
   // Indicates that the entire gradient should be recalculated next time.
@@ -94,6 +95,10 @@ private:
   rclcpp::Subscription<geometry_msgs::msg::PoseWithCovarianceStamped>::SharedPtr amcl_pose_sub_;
   geometry_msgs::msg::PoseStamped current_pose_;
   bool pose_received_;
+
+  std::vector<double> robot_footprint_vec_;
+  std::vector<geometry_msgs::msg::Point> robot_footprint_;
+  std::vector<geometry_msgs::msg::Point> parseFootprint(const std::vector<double>& footprint);
 
   // Size of gradient in cells
   int GRADIENT_SIZE = 20;
