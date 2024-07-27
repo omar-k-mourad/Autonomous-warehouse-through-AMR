@@ -146,7 +146,7 @@ def generate_launch_description():
         #              https://github.com/ROBOTIS-GIT/turtlebot3_simulations/issues/91
         # default_value=os.path.join(get_package_share_directory('turtlebot3_gazebo'),
         # worlds/turtlebot3_worlds/waffle.model')
-        default_value=os.path.join(my_dir, 'worlds', 'my_world.world'),
+        default_value=os.path.join(bringup_dir, 'worlds', 'world_only.model'),
         description='Full path to world model file to load')
 
     declare_robot_name_cmd = DeclareLaunchArgument(
@@ -196,7 +196,7 @@ def generate_launch_description():
         '-topic', '/robot1/robot_description',
         '-entity', 'robot1',
         '-robot_namespace', 'robot1',
-        '-x', '0.0', '-y', '0.5', '-z', '0.01',
+        '-x', '-1.0', '-y', '0.5', '-z', '0.01',
         '-R', pose['R'], '-P', pose['P'], '-Y', pose['Y']]
 )
 
@@ -209,7 +209,7 @@ def generate_launch_description():
         '-topic', '/robot2/robot_description',
         '-entity', 'robot2',
         '-robot_namespace', 'robot2',
-        '-x', '0.0', '-y', '-0.5', '-z', '0.01',
+        '-x', '-1.0', '-y', '-0.5', '-z', '0.01',
         '-R', pose['R'], '-P', pose['P'], '-Y', pose['Y']]
 )
 
