@@ -16,7 +16,7 @@ class TrajectoryActionClient(Node):
         goal_msg.trajectory.joint_names = ['lift_joint']
 
         point = JointTrajectoryPoint()
-        point.positions = [0.0]
+        point.positions = [0.02]
         point.time_from_start.sec = 0
         point.time_from_start.nanosec = 0
         
