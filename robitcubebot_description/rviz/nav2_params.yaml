@@ -346,8 +346,8 @@ waypoint_follower:
     waypoint_task_executor_plugin: "lift_at_waypoint"
     lift_at_waypoint:
       plugin: "nav2_waypoint_follower::LiftAtWaypoint"
-      loading_unloading_time: 2         # Can be "load", "do nothing", or "unload"
-      lift_speed: 0.1          # Speed in the z-axis
+      min_lift_pos: 0.0        
+      max_lift_pos: 0.8       
       enabled: True            # Enable or disable the plugin
       robot_footprint: [0.2, 0.2, 0.2, -0.2, -0.2, -0.2, -0.2, 0.2]
       pallet_footprint: [0.23, 0.23, 0.23, -0.23, -0.23, -0.23, -0.23, 0.23]

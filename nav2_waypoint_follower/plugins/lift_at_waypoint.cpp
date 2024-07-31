@@ -10,7 +10,7 @@ namespace nav2_waypoint_follower
 
 LiftAtWaypoint::LiftAtWaypoint()
 : logger_(rclcpp::get_logger("LiftAtWaypoint")),
-  lift_speed_(0.0),
+  min_pos_(0.0),
   is_enabled_(true)
 {
 }
@@ -27,21 +27,21 @@ void LiftAtWaypoint::initialize(
   if (!node) {
     throw std::runtime_error{"Failed to lock node in lift at waypoint plugin!"};
   }
-  
-  lift_pub_ = node->create_publisher<geometry_msgs::msg::Twist>("lift_cmd", 10);
+
   global_footprint_pub_ = node->create_publisher<geometry_msgs::msg::Polygon>("global_costmap/footprint", 10);
   local_footprint_pub_ = node->create_publisher<geometry_msgs::msg::Polygon>("local_costmap/footprint", 10);
   
   clock_ = node->get_clock();
+  action_client_ = rclcpp_action::create_client<moveit_msgs::action::MoveGroup>(node, "/move_action");
 
   nav2_util::declare_parameter_if_not_declared(
     node,
-    plugin_name + ".loading_unloading_time",
-    rclcpp::ParameterValue(0));
+    plugin_name + ".min_lift_pos",
+    rclcpp::ParameterValue(0.0));
   nav2_util::declare_parameter_if_not_declared(
     node,
-    plugin_name + ".lift_speed",
-    rclcpp::ParameterValue(0.0));
+    plugin_name + ".max_lift_pos",
+    rclcpp::ParameterValue(0.020));
   nav2_util::declare_parameter_if_not_declared(
     node,
     plugin_name + ".enabled",
@@ -55,8 +55,8 @@ void LiftAtWaypoint::initialize(
     plugin_name + ".pallet_footprint",
     rclcpp::ParameterValue(std::vector<double>{}));
 
-  node->get_parameter(plugin_name + ".loading_unloading_time", loading_unloading_time_);
-  node->get_parameter(plugin_name + ".lift_speed", lift_speed_);
+  node->get_parameter(plugin_name + ".min_lift_pos", min_pos_);
+  node->get_parameter(plugin_name + ".max_lift_pos", max_pos_);
   node->get_parameter(plugin_name + ".enabled", is_enabled_);
   node->get_parameter(plugin_name + ".robot_footprint", robot_footprint_vec_);
   node->get_parameter(plugin_name + ".pallet_footprint", pallet_footprint_vec_);
@@ -101,25 +101,20 @@ bool LiftAtWaypoint::processAtWaypoint(
     return true;
   }
 
-  geometry_msgs::msg::Twist lift_cmd;
-  lift_cmd.linear.z = 0.0;
-
   int action_index = (curr_waypoint_index) % 3;
 
   switch (action_index) {
     case 0:
-      lift_cmd.linear.z = lift_speed_;
-      RCLCPP_INFO(logger_, "Loading at waypoint %i for time : %i s", curr_waypoint_index, loading_unloading_time_);
-      publishLiftCmdForDuration(lift_cmd, loading_unloading_time_);
+      RCLCPP_INFO(logger_, "Loading at waypoint %i ", curr_waypoint_index);
+      sendLiftGoal(min_pos_, max_pos_);
       updateFootprint(true);
       break;
     case 1:
       RCLCPP_INFO(logger_, "Doing nothing at waypoint %i", curr_waypoint_index);
       return true;
     case 2:
-      lift_cmd.linear.z = -lift_speed_;
-      RCLCPP_INFO(logger_, "Unloading at waypoint %i for time : %i s", curr_waypoint_index, loading_unloading_time_);
-      publishLiftCmdForDuration(lift_cmd, loading_unloading_time_);
+      RCLCPP_INFO(logger_, "Unloading at waypoint %i ", curr_waypoint_index);
+      sendLiftGoal(max_pos_, min_pos_);
       updateFootprint(false);
       break;
     default:
@@ -130,20 +125,61 @@ bool LiftAtWaypoint::processAtWaypoint(
   return true;
 }
 
-void LiftAtWaypoint::publishLiftCmdForDuration(const geometry_msgs::msg::Twist & lift_cmd, double duration)
+void LiftAtWaypoint::sendLiftGoal(double start_position_, double end_position)
 {
-  auto start_time = clock_->now();
-  rclcpp::Rate rate(10);
+  auto goal_msg = moveit_msgs::action::MoveGroup::Goal();
 
-  while (rclcpp::ok() && (clock_->now() - start_time).seconds() < duration) {
-    lift_pub_->publish(lift_cmd);
-    rate.sleep();
-    RCLCPP_INFO(logger_, "LIFT IN PROGRESS");
+  goal_msg.request.group_name = "gripper";
+
+  moveit_msgs::msg::RobotState start_state;
+  sensor_msgs::msg::JointState joint_state;
+  joint_state.name.push_back("lift_joint");
+  joint_state.position.push_back(start_position_);
+  start_state.joint_state = joint_state;
+  goal_msg.request.start_state = start_state;
+
+  moveit_msgs::msg::Constraints goal_constraints;
+  moveit_msgs::msg::JointConstraint joint_constraint;
+  joint_constraint.joint_name = "lift_joint";
+  joint_constraint.position = end_position;
+  goal_constraints.joint_constraints.push_back(joint_constraint);
+  goal_msg.request.goal_constraints.push_back(goal_constraints);
+
+  this->action_client_->wait_for_action_server();
+
+  auto send_goal_options = rclcpp_action::Client<moveit_msgs::action::MoveGroup>::SendGoalOptions();
+  send_goal_options.feedback_callback = std::bind(&LiftAtWaypoint::feedbackCallback, this, std::placeholders::_1, std::placeholders::_2);
+
+  auto goal_handle_future = this->action_client_->async_send_goal(goal_msg, send_goal_options);
+  auto result_future = this->action_client_->async_get_result(goal_handle_future.get());
+
+  // Handle the result
+  if (result_future.wait_for(std::chrono::seconds(30)) == std::future_status::ready) {
+      auto result = result_future.get();
+      switch (result.code) {
+          case rclcpp_action::ResultCode::SUCCEEDED:
+              RCLCPP_INFO(logger_, "Action succeeded");
+              break;
+          case rclcpp_action::ResultCode::ABORTED:
+              RCLCPP_ERROR(logger_, "Action was aborted");
+              break;
+          case rclcpp_action::ResultCode::CANCELED:
+              RCLCPP_ERROR(logger_, "Action was canceled");
+              break;
+          default:
+              RCLCPP_ERROR(logger_, "Unknown result code");
+              break;
+      }
+  } else {
+      RCLCPP_ERROR(logger_, "Action did not complete in the expected time");
   }
+}
 
-  geometry_msgs::msg::Twist stop_cmd;
-  stop_cmd.linear.z = 0.0;
-  lift_pub_->publish(stop_cmd);
+void LiftAtWaypoint::feedbackCallback(
+  rclcpp_action::ClientGoalHandle<moveit_msgs::action::MoveGroup>::SharedPtr,
+  const std::shared_ptr<const moveit_msgs::action::MoveGroup::Feedback> /*feedback*/)
+{
+  RCLCPP_INFO(logger_, "Received feedback");
 }
 
 void LiftAtWaypoint::updateFootprint(bool is_loaded)

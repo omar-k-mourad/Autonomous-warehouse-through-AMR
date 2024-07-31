@@ -53,7 +53,7 @@ def generate_launch_description():
     use_rviz = LaunchConfiguration('use_rviz')
     headless = LaunchConfiguration('headless')
     world = LaunchConfiguration('world')
-    pose = {'x': LaunchConfiguration('x_pose', default='-2.00'),
+    pose = {'x': LaunchConfiguration('x_pose', default='0.00'),
             'y': LaunchConfiguration('y_pose', default='-0.50'),
             'z': LaunchConfiguration('z_pose', default='0.01'),
             'R': LaunchConfiguration('roll', default='0.00'),
@@ -146,7 +146,7 @@ def generate_launch_description():
         #              https://github.com/ROBOTIS-GIT/turtlebot3_simulations/issues/91
         # default_value=os.path.join(get_package_share_directory('turtlebot3_gazebo'),
         # worlds/turtlebot3_worlds/waffle.model')
-        default_value=os.path.join(bringup_dir, 'worlds', 'world_only.model'),
+        default_value=os.path.join(robit_dir, 'rviz', 'mini.world'),
         description='Full path to world model file to load')
 
     declare_robot_name_cmd = DeclareLaunchArgument(
