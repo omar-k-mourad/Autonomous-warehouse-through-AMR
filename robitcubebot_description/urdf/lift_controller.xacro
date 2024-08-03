@@ -1,0 +1,43 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+  <ros2_control name="RobotSystem" type="system">
+      <!-- ros2_control Gazebo -->
+      <hardware>
+          <plugin>gazebo_ros2_control/GazeboSystem</plugin>
+      </hardware>
+      <joint name="lift_joint">
+          <command_interface name="position">
+          <param name="min">-0.035</param>
+          <param name="max">1.5</param>
+          </command_interface>
+          <state_interface name="position"/>
+      </joint>
+  </ros2_control>
+
+  <!-- Prismatic joint for lifting -->
+  <joint name="lift_joint" type="prismatic">
+    <origin xyz="0 0 0.03" rpy="0 0 0"/>
+    <parent link="link_platform_mid" />
+    <child link="lift_link" />
+    <axis xyz="0 0 1" rpy="0 0 0"/>
+    <limit effort="10000.0" lower="-0.035" upper="1.0" velocity="1.0"/>
+    <dynamics damping="0.1" friction="0.1"/>
+    <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
+  </joint>
+  
+  <gazebo>
+    <plugin filename="libgazebo_ros2_control.so" name="gazebo_ros2_control">
+      <ros>
+          <remapping>/tf:=tf</remapping>
+      </ros>
+      <robot_param>robot_description</robot_param>
+      <robot_param_node>robot_state_publisher</robot_param_node>
+      <parameters>$(find robitcubebot_bringup)/config/lift_params.yaml</parameters>
+    </plugin>
+  </gazebo>
+
+ <!-- Use the lifter transmission macro for lift_joint -->
+ <lifter_transmission joint_name="lift_joint" actuator_name="lifter_motor"/>
+
+
+</robot>

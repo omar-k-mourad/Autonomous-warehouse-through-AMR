@@ -10,8 +10,7 @@
                 "/home/omar/Nav2/Workspaces/turtlebot3_ws/install/turtlebot3_fake_node/include/**",
                 "/opt/ros/humble/include/**",
                 "/usr/include/**",
-                "${workspaceFolder}/nav2_waypoint_follower/include",
-                "${workspaceFolder}/custom_nav2_costmap_plugin/include"
+                "${workspaceFolder}/nav2_waypoint_follower/include"
             ],
             "name": "ROS",
             "intelliSenseMode": "gcc-x64",

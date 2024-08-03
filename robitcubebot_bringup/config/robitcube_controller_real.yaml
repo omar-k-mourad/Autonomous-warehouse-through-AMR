@@ -1,0 +1,43 @@
+controller_manager:
+  ros__parameters:
+    update_rate: 100
+   # use_sim_time: true
+   # The robot description URDF
+    
+    diff_drive_controller:
+      type: diff_drive_controller/DiffDriveController
+    
+    joint_broad:
+      type: joint_state_broadcaster/JointStateBroadcaster
+
+diff_drive_controller:
+  ros__parameters:
+    left_wheel_names: ["front_wheel_left_joint", "back_wheel_left_joint"]
+    right_wheel_names: ["front_wheel_right_joint", "back_wheel_right_joint"]
+    wheel_separation: 0.24
+    wheel_radius: 0.0325  # half of wheel diameter
+
+    publish_rate: 100.0
+    open_loop: true
+    velocity_rolling_window_size: 10
+
+    # Odometry parameters
+    publish_odom: true
+    odom_frame_id: "odom"
+    base_frame_id: "base_footprint"
+    enable_odom_tf: true
+    pose_covariance_diagonal: [0.001, 0.001, 0.001, 0.0, 0.0, 0.001]
+    twist_covariance_diagonal: [0.001, 0.001, 0.001, 0.0, 0.0, 0.001]
+    # Additional parameters from Gazebo plugin
+    wheel_separation_multiplier: 1.0
+    wheel_radius_multiplier: 1.0
+    publish_wheel_tf: true
+
+    cmd_vel_timeout: 0.5
+    publish_cmd: false
+    allow_multiple_cmd_vel_publishers: false
+    twist_covariance_diagonal: [0.001, 0.001, 0.001, 0.0, 0.0, 0.001]
+    pose_covariance_diagonal: [0.001, 0.001, 0.001, 0.0, 0.0, 0.001]
+    odom_frame_id: "odom"
+    base_frame_id: "base_footprint"
+    enable_odom_tf: true

@@ -1,0 +1,29 @@
+{
+  "configurations": [
+    {
+      "browse": {
+        "databaseFilename": "${default}",
+        "limitSymbolsToIncludedHeaders": false
+      },
+      "includePath": [
+        "/home/omar/robit/install/robitcubebot_localization/include/**",
+        "/home/omar/robit/install/robitcubebot_firmware/include/**",
+        "/home/omar/robit/install/robitcubebot_controller/include/**",
+        "/opt/ros/humble/include/**",
+        "/home/omar/robit/src/robitcubebot_controller/include/**",
+        "/home/omar/robit/src/robitcubebot_firmware/include/**",
+        "/home/omar/robit/src/robitcubebot_localization/include/**",
+        "/home/omar/robit/src/robitcubebot_moveit/include/**",
+        "/home/omar/robit/src/robitcubebot_navigation/include/**",
+        "/home/omar/robit/src/robitcubebot_test_launch/include/**",
+        "/usr/include/**"
+      ],
+      "name": "ROS",
+      "intelliSenseMode": "gcc-x64",
+      "compilerPath": "/usr/bin/gcc",
+      "cStandard": "gnu11",
+      "cppStandard": "c++14"
+    }
+  ],
+  "version": 4
+}
