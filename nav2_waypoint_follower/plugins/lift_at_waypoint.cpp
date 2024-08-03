@@ -32,7 +32,22 @@ void LiftAtWaypoint::initialize(
   local_footprint_pub_ = node->create_publisher<geometry_msgs::msg::Polygon>("local_costmap/footprint", 10);
   
   clock_ = node->get_clock();
-  action_client_ = rclcpp_action::create_client<moveit_msgs::action::MoveGroup>(node, "/move_action");
+  //std::string robot_name_ = std::string(node->get_namespace());
+  //action_client_ = rclcpp_action::create_client<moveit_msgs::action::MoveGroup>(node, robot_name_ + "/move_action");
+  //action_client_ = rclcpp_action::create_client<moveit_msgs::action::MoveGroup>(node, "/move_action");
+
+  const char* robot_name_ = node->get_namespace();
+  
+  // Check if the namespace is empty or just "/"
+  std::string action_name;
+  if (std::strlen(robot_name_) == 0 || std::strcmp(robot_name_, "/") == 0) {
+    action_name = "/move_action";
+  } else {
+    action_name = std::string(robot_name_) + "/move_action";
+  }
+
+  // Create the action client
+  action_client_ = rclcpp_action::create_client<moveit_msgs::action::MoveGroup>(node, action_name);
 
   nav2_util::declare_parameter_if_not_declared(
     node,
