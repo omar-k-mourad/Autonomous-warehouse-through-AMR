@@ -212,7 +212,23 @@ def generate_launch_description():
         '-x', '-1.0', '-y', '-0.5', '-z', '0.01',
         '-R', pose['R'], '-P', pose['P'], '-Y', pose['Y']]
 )
+    joint_broad_spawner = Node(
+        package="controller_manager",
+        executable="spawner",
+        namespace=namespace,
+        arguments=["joint_broad"],
+    )
 
+    controller_manager_name = PythonExpression([
+        '"/', namespace, '/controller_manager', '"'
+    ])
+    gripper_controller_spawner = Node(
+        package="controller_manager",
+        executable="spawner",
+        namespace=namespace,
+        arguments=["gripper_controller", "--controller-manager", controller_manager_name],
+    )
+    
     rviz_cmd = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
             os.path.join(launch_dir, 'rviz_launch.py')),
@@ -265,6 +281,8 @@ def generate_launch_description():
 
     # Add the actions to launch all of the navigation nodes
     ld.add_action(start_robot_state_publisher_cmd)
+    ld.add_action(joint_broad_spawner)
+    ld.add_action(gripper_controller_spawner)
     ld.add_action(rviz_cmd)
     ld.add_action(bringup_cmd)
 

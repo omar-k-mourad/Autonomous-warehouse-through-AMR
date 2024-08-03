@@ -27,6 +27,9 @@
   
   <gazebo>
     <plugin filename="libgazebo_ros2_control.so" name="gazebo_ros2_control">
+      <ros>
+          <remapping>/tf:=tf</remapping>
+      </ros>
       <robot_param>robot_description</robot_param>
       <robot_param_node>robot_state_publisher</robot_param_node>
       <parameters>$(find robitcubebot_bringup)/config/lift_params.yaml</parameters>

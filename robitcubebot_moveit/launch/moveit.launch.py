@@ -9,6 +9,7 @@ from ament_index_python.packages import get_package_share_directory
 
 def generate_launch_description():
 
+    namespace = LaunchConfiguration('namespace')
     is_sim = LaunchConfiguration('is_sim')
     
     is_sim_arg = DeclareLaunchArgument(
@@ -33,6 +34,7 @@ def generate_launch_description():
         package="moveit_ros_move_group",
         executable="move_group",
         output="screen",
+        namespace=namespace,
         parameters=[moveit_config.to_dict(), 
                     {'use_sim_time': is_sim},
                     {'publish_robot_description_semantic': True}],
@@ -63,6 +65,6 @@ def generate_launch_description():
         [
             is_sim_arg,
             move_group_node, 
-            rviz_node
+            #rviz_node
         ]
     )

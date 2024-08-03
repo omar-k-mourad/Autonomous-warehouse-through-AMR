@@ -9,8 +9,6 @@ controller_manager:
       type: joint_state_broadcaster/JointStateBroadcaster
 
 
-
-
 gripper_controller:
   ros__parameters:
     joints:
@@ -21,9 +19,54 @@ gripper_controller:
       - position
     open_loop_control: true
     allow_integration_in_goal_trajectories: true
+    
+robot1:
+  controller_manager:
+    ros__parameters:
+      update_rate: 100 # Hz
 
-
-
-
+      gripper_controller:
+        type: joint_trajectory_controller/JointTrajectoryController
       
+      joint_broad:
+        type: joint_state_broadcaster/JointStateBroadcaster
 
+
+
+
+  gripper_controller:
+    ros__parameters:
+      joints:
+        - lift_joint
+      command_interfaces:
+        - position
+      state_interfaces:
+        - position
+      open_loop_control: true
+      allow_integration_in_goal_trajectories: true
+
+
+robot2:
+  controller_manager:
+    ros__parameters:
+      update_rate: 100 # Hz
+
+      gripper_controller:
+        type: joint_trajectory_controller/JointTrajectoryController
+      
+      joint_broad:
+        type: joint_state_broadcaster/JointStateBroadcaster
+
+
+
+
+  gripper_controller:
+    ros__parameters:
+      joints:
+        - lift_joint
+      command_interfaces:
+        - position
+      state_interfaces:
+        - position
+      open_loop_control: true
+      allow_integration_in_goal_trajectories: true

@@ -146,6 +146,12 @@ def generate_launch_description():
                                   'yaw': TextSubstitution(text=str(robot['yaw'])),
                                   'robot_name':TextSubstitution(text=robot['name']), }.items()),
 
+            IncludeLaunchDescription(
+                PythonLaunchDescriptionSource(os.path.join(get_package_share_directory("robitcubebot_moveit"),
+                                                           'launch',
+                                                           "moveit.launch.py")),
+                launch_arguments={'namespace': robot['name'],}.items()),
+
             LogInfo(
                 condition=IfCondition(log_settings),
                 msg=['Launching ', robot['name']]),
