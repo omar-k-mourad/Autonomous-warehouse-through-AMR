@@ -16,14 +16,8 @@ def generate_launch_description():
     use_sim_time = LaunchConfiguration('use_sim_time')
 
     # Process the URDF file
-<<<<<<< HEAD:my_bot/launch/rsp.launch.py
-    pkg_path = os.path.join(get_package_share_directory('my_bot'))
-    #xacro_file = os.path.join(pkg_path,'description','robot.urdf.xacro')
-    xacro_file = os.path.join(pkg_path,'description','robot.urdf.xacro')
-=======
     pkg_path = os.path.join(get_package_share_directory('robitcubebot_description'))
     xacro_file = os.path.join(pkg_path,'urdf','robitcubebot.urdf.xacro')
->>>>>>> new_controller_abdelgwad:robitcubebot_description/launch/rsp.launch.py
     robot_description_config = xacro.process_file(xacro_file)
     
     # Create a robot_state_publisher node

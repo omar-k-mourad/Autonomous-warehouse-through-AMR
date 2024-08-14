@@ -4,7 +4,7 @@ from ament_index_python.packages import get_package_share_directory
 
 
 from launch import LaunchDescription
-from launch.actions import IncludeLaunchDescription
+from launch.actions import IncludeLaunchDescription, DeclareLaunchArgument
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 
 from launch_ros.actions import Node
@@ -18,6 +18,11 @@ def generate_launch_description():
     # !!! MAKE SURE YOU SET THE PACKAGE NAME CORRECTLY !!!
 
     package_name='robitcubebot_description' #<--- CHANGE ME
+
+    declare_namespace_cmd = DeclareLaunchArgument(
+        'namespace',
+        default_value='',
+        description='Top-level namespace')
 
     display_and_rviz = IncludeLaunchDescription(
                 PythonLaunchDescriptionSource([os.path.join(
@@ -58,6 +63,7 @@ def generate_launch_description():
 
     # Launch them all!
     return LaunchDescription([
+        declare_namespace_cmd,
         display_and_rviz,
         gazebo,
         spawn_entity,

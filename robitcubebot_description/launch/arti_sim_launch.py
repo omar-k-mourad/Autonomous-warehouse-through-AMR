@@ -30,10 +30,8 @@ from launch_ros.actions import Node
 def generate_launch_description():
     # Get the launch directory
     bringup_dir = get_package_share_directory('nav2_bringup')
-    my_dir = get_package_share_directory('my_bot')
     robit_dir = get_package_share_directory('robitcubebot_description')
     launch_dir = os.path.join(bringup_dir, 'launch')
-    my_launch_dir = os.path.join(my_dir, 'launch')
 
     # Create the launch configuration variables
     slam = LaunchConfiguration('slam')
@@ -142,12 +140,8 @@ def generate_launch_description():
 
     declare_world_cmd = DeclareLaunchArgument(
         'world',
-        # TODO(orduno) Switch back once ROS argument passing has been fixed upstream
-        #              https://github.com/ROBOTIS-GIT/turtlebot3_simulations/issues/91
-        # default_value=os.path.join(get_package_share_directory('turtlebot3_gazebo'),
-        # worlds/turtlebot3_worlds/waffle.model')
-        default_value=os.path.join(bringup_dir, 'worlds', 'world_only.model'),
-        description='Full path to world model file to load')
+        default_value=os.path.join(robit_dir, 'rviz', 'warehouse4.world'),
+        description='Full path to world file to load')
 
     declare_robot_name_cmd = DeclareLaunchArgument(
         'robot_name',
@@ -228,7 +222,7 @@ def generate_launch_description():
 
     bringup_cmd = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
-            os.path.join(my_launch_dir, 'bringup_launch.py')),
+            os.path.join(launch_dir, 'bringup_launch.py')),
         launch_arguments={'namespace': namespace,
                           'use_namespace': use_namespace,
                           'slam': slam,
