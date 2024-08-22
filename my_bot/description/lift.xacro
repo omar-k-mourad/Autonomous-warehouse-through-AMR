@@ -1,0 +1,80 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <xacro:property name="screw_diameter" value="0.008" />
+  <xacro:property name="screw_length" value="0.10" />
+  <xacro:property name="plate_radius" value="0.045" />
+  <xacro:property name="screw_length" value="0.10" />
+  <xacro:property name="robot_height" value="0.15" />
+
+
+  <xacro:macro name="lifter_transmission" params="joint_name actuator_name">
+    <transmission name="${joint_name}_transmission">
+        <plugin>transmission_interface/SimpleTransmission</plugin>
+        <actuator name="${actuator_name}" role="actuator1"/>
+        <joint name="${joint_name}" role="joint1">
+            <mechanical_reduction>1.0</mechanical_reduction>
+        </joint>
+    </transmission>
+  </xacro:macro>
+
+
+   <!-- Link for the platform mid -->
+  <link name="link_platform_mid">
+    <origin xyz="0 0 0.0" rpy="0 0 0"/>
+    <visual>
+      <geometry>
+        <cylinder radius="0.005" length="0.04"/>
+      </geometry>
+      <material name="black">
+        <color rgba="0.1 0.1 0.1 1" />
+      </material>
+    </visual>
+    <collision>
+      <geometry>
+         <cylinder radius="0.01" length="0.04"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <mass value="1"/>
+      <inertia ixx="1.0" ixy="0.0" ixz="0.0"
+               iyy="1.0" iyz="0.0"
+               izz="1.0"/>
+    </inertial>
+  </link>
+
+  <!-- Joint connecting upper link to platform mid -->
+  <joint name="platform_joint" type="fixed">
+    <parent link="base_link" />
+    <child link="link_platform_mid" />
+    <origin xyz="0.0 0 ${robot_height+0.015}" rpy="0 0 0"/>
+  </joint>
+
+  <!-- Link for the lift mechanism -->
+  <link name="lift_link">
+    <visual>
+      <origin xyz="0 0  0.0" rpy="0 0 0"/>
+      <geometry>
+        <cylinder radius="0.14" length="0.0015"/>
+      </geometry>
+      <material name="black">
+        <color rgba="0.1 0.1 0.1 1" />
+      </material>
+    </visual>
+    <collision>
+      <geometry>
+        <cylinder radius="0.1" length="0.001"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <mass value="1"/>
+      <inertia ixx="1.0" ixy="0.0" ixz="0.0"
+               iyy="1.0" iyz="0.0"
+               izz="1.0"/>
+    </inertial>
+  </link>
+
+
+
+
+</robot>

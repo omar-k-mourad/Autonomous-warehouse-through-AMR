@@ -35,7 +35,7 @@ from launch.substitutions import LaunchConfiguration, TextSubstitution
 def generate_launch_description():
     # Get the launch directory
     bringup_dir = get_package_share_directory('nav2_bringup')
-    my_dir = get_package_share_directory('robitcubebot_description')
+    my_dir = get_package_share_directory('my_bot')
     launch_dir = os.path.join(bringup_dir, 'launch')
 
     # Names and poses of the robots
@@ -76,12 +76,12 @@ def generate_launch_description():
 
     declare_robot1_params_file_cmd = DeclareLaunchArgument(
         'robot1_params_file',
-        default_value=os.path.join(my_dir, 'rviz', 'nav2_multirobot_params_1.yaml'),
+        default_value=os.path.join(my_dir, 'config', 'nav2_multirobot_params_1.yaml'),
         description='Full path to the ROS2 parameters file to use for robot1 launched nodes')
 
     declare_robot2_params_file_cmd = DeclareLaunchArgument(
         'robot2_params_file',
-        default_value=os.path.join(my_dir, 'rviz', 'nav2_multirobot_params_2.yaml'),
+        default_value=os.path.join(my_dir, 'config', 'nav2_multirobot_params_2.yaml'),
         description='Full path to the ROS2 parameters file to use for robot2 launched nodes')
 
     declare_autostart_cmd = DeclareLaunchArgument(
@@ -145,12 +145,6 @@ def generate_launch_description():
                                   'pitch': TextSubstitution(text=str(robot['pitch'])),
                                   'yaw': TextSubstitution(text=str(robot['yaw'])),
                                   'robot_name':TextSubstitution(text=robot['name']), }.items()),
-
-            IncludeLaunchDescription(
-                PythonLaunchDescriptionSource(os.path.join(get_package_share_directory("robitcubebot_moveit"),
-                                                           'launch',
-                                                           "moveit.launch.py")),
-                launch_arguments={'namespace': robot['name'],}.items()),
 
             LogInfo(
                 condition=IfCondition(log_settings),

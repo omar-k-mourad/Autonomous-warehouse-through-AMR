@@ -30,8 +30,7 @@ from launch_ros.actions import Node
 def generate_launch_description():
     # Get the launch directory
     bringup_dir = get_package_share_directory('nav2_bringup')
-    my_dir = get_package_share_directory('robitcubebot_description')
-    bot_dir = get_package_share_directory('my_bot')
+    my_dir = get_package_share_directory('my_bot')
     launch_dir = os.path.join(bringup_dir, 'launch')
     my_launch_dir = os.path.join(my_dir, 'launch')
 
@@ -147,7 +146,7 @@ def generate_launch_description():
         #              https://github.com/ROBOTIS-GIT/turtlebot3_simulations/issues/91
         # default_value=os.path.join(get_package_share_directory('turtlebot3_gazebo'),
         # worlds/turtlebot3_worlds/waffle.model')
-        default_value=os.path.join(bringup_dir, 'worlds', 'world_only.model'),
+        default_value=os.path.join(my_dir, 'worlds', 'my_world.world'),
         description='Full path to world model file to load')
 
     declare_robot_name_cmd = DeclareLaunchArgument(
@@ -173,8 +172,7 @@ def generate_launch_description():
         cmd=['gzclient'],
         cwd=[launch_dir], output='screen')
 
-    x_urdf = os.path.join(bot_dir, 'description', 'robot.urdf.xacro')
-    #x_urdf = os.path.join(my_dir, 'urdf', 'robitcubebot.urdf.xacro')
+    x_urdf = os.path.join(my_dir, 'description', 'robot.urdf.xacro')
     p_urdf = xacro.process_file(x_urdf)
     urdf = p_urdf.toxml()
     robot_description_config = urdf
@@ -198,7 +196,7 @@ def generate_launch_description():
         '-topic', '/robot1/robot_description',
         '-entity', 'robot1',
         '-robot_namespace', 'robot1',
-        '-x', '-1.0', '-y', '0.5', '-z', '0.01',
+        '-x', pose['x'], '-y', pose['y'], '-z', pose['z'],
         '-R', pose['R'], '-P', pose['P'], '-Y', pose['Y']]
 )
 
@@ -211,26 +209,10 @@ def generate_launch_description():
         '-topic', '/robot2/robot_description',
         '-entity', 'robot2',
         '-robot_namespace', 'robot2',
-        '-x', '-1.0', '-y', '-0.5', '-z', '0.01',
+        '-x', pose['x'], '-y', pose['y'], '-z', pose['z'],
         '-R', pose['R'], '-P', pose['P'], '-Y', pose['Y']]
 )
-    joint_broad_spawner = Node(
-        package="controller_manager",
-        executable="spawner",
-        namespace=namespace,
-        arguments=["joint_broad"],
-    )
 
-    controller_manager_name = PythonExpression([
-        '"/', namespace, '/controller_manager', '"'
-    ])
-    gripper_controller_spawner = Node(
-        package="controller_manager",
-        executable="spawner",
-        namespace=namespace,
-        arguments=["gripper_controller", "--controller-manager", controller_manager_name],
-    )
-    
     rviz_cmd = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
             os.path.join(launch_dir, 'rviz_launch.py')),
@@ -283,8 +265,6 @@ def generate_launch_description():
 
     # Add the actions to launch all of the navigation nodes
     ld.add_action(start_robot_state_publisher_cmd)
-    ld.add_action(joint_broad_spawner)
-    ld.add_action(gripper_controller_spawner)
     ld.add_action(rviz_cmd)
     ld.add_action(bringup_cmd)
 

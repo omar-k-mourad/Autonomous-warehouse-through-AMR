@@ -30,8 +30,8 @@ from launch_ros.actions import Node
 def generate_launch_description():
     # Get the launch directory
     bringup_dir = get_package_share_directory('nav2_bringup')
-    my_dir = get_package_share_directory('robitcubebot_description')
-    bot_dir = get_package_share_directory('my_bot')
+    my_dir = get_package_share_directory('my_bot')
+    robit_dir = get_package_share_directory('robitcubebot_description')
     launch_dir = os.path.join(bringup_dir, 'launch')
     my_launch_dir = os.path.join(my_dir, 'launch')
 
@@ -89,8 +89,7 @@ def generate_launch_description():
 
     declare_map_yaml_cmd = DeclareLaunchArgument(
         'map',
-        default_value=os.path.join(
-            bringup_dir, 'maps', 'turtlebot3_world.yaml'),
+        default_value=os.path.join(bringup_dir, 'maps', 'turtlebot3_world.yaml'),
         description='Full path to map file to load')
 
     declare_use_sim_time_cmd = DeclareLaunchArgument(
@@ -100,7 +99,7 @@ def generate_launch_description():
 
     declare_params_file_cmd = DeclareLaunchArgument(
         'params_file',
-        default_value=os.path.join(bringup_dir, 'params', 'nav2_params.yaml'),
+        default_value=os.path.join(my_dir, 'config', 'nav2_params.yaml'),
         description='Full path to the ROS2 parameters file to use for all launched nodes')
 
     declare_autostart_cmd = DeclareLaunchArgument(
@@ -173,8 +172,7 @@ def generate_launch_description():
         cmd=['gzclient'],
         cwd=[launch_dir], output='screen')
 
-    x_urdf = os.path.join(bot_dir, 'description', 'robot.urdf.xacro')
-    #x_urdf = os.path.join(my_dir, 'urdf', 'robitcubebot.urdf.xacro')
+    x_urdf = os.path.join(robit_dir, 'urdf', 'robitcubebot.urdf.xacro')
     p_urdf = xacro.process_file(x_urdf)
     urdf = p_urdf.toxml()
     robot_description_config = urdf
@@ -190,47 +188,18 @@ def generate_launch_description():
                      'robot_description': robot_description_config}],
         remappings=remappings)
 
-    start_gazebo_spawner_cmd_1 = Node(
+    start_gazebo_spawner_cmd = Node(
     package='gazebo_ros',
     executable='spawn_entity.py',
     output='screen',
     arguments=[
-        '-topic', '/robot1/robot_description',
-        '-entity', 'robot1',
-        '-robot_namespace', 'robot1',
-        '-x', '-1.0', '-y', '0.5', '-z', '0.01',
+        '-topic', 'robot_description',
+        '-entity', robot_name,
+        '-robot_namespace', namespace,
+        '-x', pose['x'], '-y', pose['y'], '-z', pose['z'],
         '-R', pose['R'], '-P', pose['P'], '-Y', pose['Y']]
 )
 
-# For robot 2
-    start_gazebo_spawner_cmd_2 = Node(
-    package='gazebo_ros',
-    executable='spawn_entity.py',
-    output='screen',
-    arguments=[
-        '-topic', '/robot2/robot_description',
-        '-entity', 'robot2',
-        '-robot_namespace', 'robot2',
-        '-x', '-1.0', '-y', '-0.5', '-z', '0.01',
-        '-R', pose['R'], '-P', pose['P'], '-Y', pose['Y']]
-)
-    joint_broad_spawner = Node(
-        package="controller_manager",
-        executable="spawner",
-        namespace=namespace,
-        arguments=["joint_broad"],
-    )
-
-    controller_manager_name = PythonExpression([
-        '"/', namespace, '/controller_manager', '"'
-    ])
-    gripper_controller_spawner = Node(
-        package="controller_manager",
-        executable="spawner",
-        namespace=namespace,
-        arguments=["gripper_controller", "--controller-manager", controller_manager_name],
-    )
-    
     rviz_cmd = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
             os.path.join(launch_dir, 'rviz_launch.py')),
@@ -278,13 +247,10 @@ def generate_launch_description():
     # Add any conditioned actions
     ld.add_action(start_gazebo_server_cmd)
     ld.add_action(start_gazebo_client_cmd)
-    ld.add_action(start_gazebo_spawner_cmd_1)
-    ld.add_action(start_gazebo_spawner_cmd_2)
+    ld.add_action(start_gazebo_spawner_cmd)
 
     # Add the actions to launch all of the navigation nodes
     ld.add_action(start_robot_state_publisher_cmd)
-    ld.add_action(joint_broad_spawner)
-    ld.add_action(gripper_controller_spawner)
     ld.add_action(rviz_cmd)
     ld.add_action(bringup_cmd)
 
