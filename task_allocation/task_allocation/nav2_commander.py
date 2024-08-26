@@ -31,7 +31,7 @@ def set_initial_pose():
 def main():
     # --- Init ROS2 communications and Simple Commander API ---
     rclpy.init()
-    nav = BasicNavigator(namespace='robot1')
+    nav = BasicNavigator(namespace='robot2')
     #nav1 = BasicNavigator(namespace='robot1')
     #nav2 = BasicNavigator(namespace='robot2')
 
@@ -51,9 +51,12 @@ def main():
     
     waypoints1 = []
 
-    goal = create_pose_stamped(nav, 0.00, 0.00, 0.0)
-
-    waypoints1.append(goal)
+    goal1 = create_pose_stamped(nav, 1.50, -1.50, 0.0)
+    goal2 = create_pose_stamped(nav, 4.0, -2.0, 0.0)
+    
+    waypoints1.append(goal1)
+    #waypoints1.append(goal2)
+    #waypoints1.append(goal1)
     nav.followWaypoints(waypoints1)
     """ 
     # --- Create some Nav2 goal poses ---
@@ -79,9 +82,9 @@ def main():
     #         # print(feedback)
     while not nav.isTaskComplete() :
         feedback = nav.getFeedback()
-        print(feedback)
+        #print(feedback)
     # --- Get the result ---
-    #print(nav1.getResult())
+    print(nav.getResult())
     #print(nav2.getResult())
 
     # --- Shutdown ROS2 communications ---

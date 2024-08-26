@@ -55,7 +55,7 @@
     <visual>
       <origin xyz="0 0  0.0" rpy="0 0 0"/>
       <geometry>
-        <cylinder radius="0.14" length="0.0015"/>
+        <cylinder radius="0.24" length="0.0015"/>
       </geometry>
       <material name="black">
         <color rgba="0.1 0.1 0.1 1" />
