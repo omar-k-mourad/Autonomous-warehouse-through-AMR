@@ -31,9 +31,9 @@ def set_initial_pose():
 def main():
     # --- Init ROS2 communications and Simple Commander API ---
     rclpy.init()
-    nav = BasicNavigator(namespace='robot2')
-    #nav1 = BasicNavigator(namespace='robot1')
-    #nav2 = BasicNavigator(namespace='robot2')
+    #nav = BasicNavigator(namespace='robot2')
+    nav1 = BasicNavigator(namespace='robot1')
+    nav2 = BasicNavigator(namespace='robot2')
 
     # --- Set initial pose ---
     # !!! Comment if the initial pose is already set !!!
@@ -50,14 +50,21 @@ def main():
     #print(len(ans.poses))
     
     waypoints1 = []
+    waypoints2 = []
 
-    goal1 = create_pose_stamped(nav, 1.50, -1.50, 0.0)
-    goal2 = create_pose_stamped(nav, 4.0, -2.0, 0.0)
+    goal1 = create_pose_stamped(nav1, 1.7, 3.5, 0.0)
+    goal2 = create_pose_stamped(nav1, -4.0, -2.0, 0.0)
+    goal4 = create_pose_stamped(nav1, 4.0, 2.0, 0.0)
+    goal3 = create_pose_stamped(nav1, -1.49, -1.55, 0)
     
-    waypoints1.append(goal1)
-    #waypoints1.append(goal2)
-    #waypoints1.append(goal1)
-    nav.followWaypoints(waypoints1)
+    waypoints1.append(goal3)
+    waypoints1.append(goal2)
+    waypoints1.append(goal3)
+    waypoints2.append(goal1)
+    waypoints2.append(goal4)
+    waypoints2.append(goal1)
+    nav2.followWaypoints(waypoints1)
+    nav1.followWaypoints(waypoints2)
     """ 
     # --- Create some Nav2 goal poses ---
     for i in range(len(shelf_poses1)):
@@ -76,15 +83,15 @@ def main():
     #nav1.followWaypoints(waypoints1)
     #nav2.followWaypoints(waypoints2)
    
-    #while not nav2.isTaskComplete() or not nav1.isTaskComplete():
-    #    pass
+    while not nav2.isTaskComplete() or not nav1.isTaskComplete():
+        pass
     #         feedback = nav.getFeedback()
     #         # print(feedback)
-    while not nav.isTaskComplete() :
-        feedback = nav.getFeedback()
+    #while not nav.isTaskComplete() :
+        #feedback = nav.getFeedback()
         #print(feedback)
     # --- Get the result ---
-    print(nav.getResult())
+    #print(nav.getResult())
     #print(nav2.getResult())
 
     # --- Shutdown ROS2 communications ---

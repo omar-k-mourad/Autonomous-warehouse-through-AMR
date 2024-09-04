@@ -43,9 +43,9 @@ def main():
     # waiting time before retriving again from queue
     waiting_time = 5
 
-    #tasks_queue = []
+    tasks_queue = []
     # for testing to add shelves directly tasks_queue = [(0,6), (3,6), (0,0), (3,0)]
-    tasks_queue = [(1.6, -1.6), (1.6, 1.6)]
+    #tasks_queue = [(1.6, -1.6), (1.6, 1.6)]
 
     try:
         while True:
@@ -58,6 +58,7 @@ def main():
                 print("waiting for tasks....")
                 time.sleep(waiting_time)
                 tasks_queue.extend(get_shelves_to_pick())
+                print("Tasks: ", tasks_queue)
 
 
             # setting input parameters for Genetic algorithm
@@ -67,7 +68,7 @@ def main():
             robots_dict = make_robots_dict("pose.csv")
             robots_coordinates = robots_dict.values()
             robots_poses = make_pose_stamps(robots_coordinates, nav)
-            picking_stations_coordinates = [(4.0, -2.0), (-4.0, 2.0)] #picking_stations_coordinates = getSlotsLocations('picking')
+            picking_stations_coordinates = [(4.0, -2.0), (-4.0, 2.0), (4.0, 2.0), (-4.0, -2.0)] #picking_stations_coordinates = getSlotsLocations('picking')
             picking_stations_poses = make_pose_stamps(picking_stations_coordinates, nav)
             pop_size = 100
             max_epochs = 1000
